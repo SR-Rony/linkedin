@@ -1,4 +1,4 @@
-import React,{useState} from 'react'
+import React,{useEffect, useState} from 'react'
 import Hadding from '../components/hadding/Hadding'
 import {FaLinkedin} from 'react-icons/fa'
 import {AiFillEyeInvisible,AiFillEye} from 'react-icons/ai'
@@ -8,6 +8,8 @@ import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from 'react-router-dom'
 import { RotatingLines } from 'react-loader-spinner'
 import {toast } from 'react-toastify';
+import { useSelector,useDispatch } from 'react-redux'
+import { userData } from '../slices/userSlice'
 
 const Login = () => {
   const auth = getAuth();
@@ -19,6 +21,14 @@ const Login = () => {
   const [emailError,setEmailError]=useState('')
   const [passwordError,setPasswordError]=useState('')
   let navigate =useNavigate()
+  let dispatch=useDispatch()
+
+  let userInfo=useSelector(state=>(state.user.value))
+  useEffect(()=>{
+    if(userInfo){
+      navigate('/profile')
+    }
+  },[])
 
   // input change
   const handleChange =(e)=>{
@@ -44,20 +54,21 @@ const Login = () => {
       signInWithEmailAndPassword(auth, email, password)
       .then((user) => {
         setLodding(false)
-        if(user.user.emailVerified){
-          navigate('/home')
-        }else{
-            toast.error('🦄 please your email varify', {
-              position: "top-right",
-              autoClose: 5000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "dark",
-            });
-        }
+        // if(user.user.emailVerified){
+          dispatch(userData(user.user))
+          navigate('/profile')
+        // }else{
+        //     toast.error('🦄 please your email varify', {
+        //       position: "top-right",
+        //       autoClose: 5000,
+        //       hideProgressBar: false,
+        //       closeOnClick: true,
+        //       pauseOnHover: true,
+        //       draggable: true,
+        //       progress: undefined,
+        //       theme: "dark",
+        //     });
+        // }
       })
       .catch((error) => {
         setLodding(false)
@@ -104,13 +115,15 @@ const Login = () => {
             {passwordError&& <Paragraph className='text-red-500 mb-3' text={passwordError}/>}
           </div>
           {lodding 
-              ?<Button className='bg-primary px-12'text={<RotatingLines
-                strokeColor="white"
-                strokeWidth="1"
-                animationDuration="0.75"
-                width="30"
-                visible={true}
-              />}/>
+              ?<div className='px-14 py-3 bg-primary text-white text-center inline-block'>
+                <RotatingLines
+                  strokeColor="white"
+                  strokeWidth="1"
+                  animationDuration="0.75"
+                  width="30"
+                  visible={true}
+                />
+              </div>
               :<Button  text='Sing Up'/>
             }
         </form>

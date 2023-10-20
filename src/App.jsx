@@ -12,6 +12,8 @@ import Error from './pages/Error';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast } from 'react-toastify';
 import Home from './pages/Home';
+import Profile from './pages/Profile';
+import RootLayout from './components/rootLayout/RootLayout';
 
 function App() {
 
@@ -20,8 +22,11 @@ function App() {
       <Route>
         <Route path='/' element={<Register/>}/>
         <Route path='/login' element={<Login/>}/>
-        <Route path='/home' element={<Home/>}/>
         <Route path='*' element={<Error/>}/>
+        <Route path='/' element={<RootLayout/>}>
+          <Route path='/profile' element={<Profile/>}/>
+          <Route path='/home' element={<Home/>}/>
+        </Route>
       </Route>
     )
   );

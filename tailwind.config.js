@@ -11,6 +11,9 @@ export default {
       },
       fontFamily: {
         'nunito': ['Nunito', 'sans-serif']
+      },
+      maxWidth: {
+        'container': '1400px',
       }
     },
   },

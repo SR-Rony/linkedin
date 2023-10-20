@@ -4,13 +4,10 @@ import {FaLinkedin} from 'react-icons/fa'
 import {AiFillEyeInvisible,AiFillEye} from 'react-icons/ai'
 import Button from '../components/button/Button'
 import Paragraph from '../components/paragraph/Paragraph'
-import { getAuth, createUserWithEmailAndPassword,updateProfile,sendEmailVerification   } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword,updateProfile,sendEmailVerification } from "firebase/auth";
 import { RotatingLines } from 'react-loader-spinner'
 import { useNavigate } from 'react-router-dom'
 import {toast } from 'react-toastify';
-import { useDispatch } from 'react-redux'
-import { userData } from '../slices/userSlice'
-import { useSelector} from 'react-redux'
 import { getDatabase,ref, set } from "firebase/database";
 
 const Register = () => {
@@ -25,11 +22,6 @@ const Register = () => {
   const [emailError,setEmailError]=useState('')
   const [passwordError,setPasswordError]=useState('')
   let navigate=useNavigate()
-  let dispatch=useDispatch()
-
-  let userInfo =useSelector(state=>(state.user.value))
-  console.log(userInfo);
-
 
   // input change
   const handleChange =(e)=>{
@@ -67,12 +59,11 @@ const Register = () => {
         sendEmailVerification(auth.currentUser)
         .then(() => {
           toast("chack your email");
-          dispatch(userData(user.user))
-        });
-        set(ref(db, 'users/'+user.user.uid),{
-          userName: fullName,
-          email: email,
-          profile_picture : 'profile pic'
+          set(ref(db, 'users/'+user.user.uid),{
+            userName: fullName,
+            email: email,
+            profile_picture : 'profile pic'
+          });
         });
       }).catch((error) => {
         console.log(error);
@@ -138,13 +129,15 @@ const Register = () => {
               
             </div>
             {lodding 
-              ?<Button className='bg-primary px-12'  text={<RotatingLines
-                strokeColor="white"
-                strokeWidth="1"
-                animationDuration="0.75"
-                width="30"
-                visible={true}
-              />}/>
+              ?<div className='px-14 py-3 bg-primary text-white text-center inline-block'>
+                <RotatingLines
+                  strokeColor="white"
+                  strokeWidth="1"
+                  animationDuration="0.75"
+                  width="30"
+                  visible={true}
+                />
+              </div>
               :<Button  text='Sing Up'/>
             }
           </form>
