@@ -56,6 +56,7 @@ const Login = () => {
         setLodding(false)
         // if(user.user.emailVerified){
           dispatch(userData(user.user))
+          localStorage.setItem('userdata',JSON.stringify(user.user))
           navigate('/profile')
         // }else{
         //     toast.error('🦄 please your email varify', {
