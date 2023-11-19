@@ -14,7 +14,7 @@ import {BiLogoUpwork,BiSolidEditAlt} from 'react-icons/bi'
 import {IoMdSchool} from 'react-icons/io'
 import Button from '../components/button/Button'
 import Modal from 'react-modal';
-import { getDatabase, ref, onValue, set } from "firebase/database";
+import { getDatabase, ref, onValue, set, push } from "firebase/database";
 import { useSelector } from 'react-redux'
 import EditLogo from '../components/edit-logo/EditLogo'
 import {toast } from 'react-toastify';
@@ -52,7 +52,7 @@ const Profile = () => {
     const [experienceOpen, setExperienceOpen] = React.useState(false);
     const [addExp,setAddExp]=useState({title:'',company:'',description:''})
     let {title,company,description}=addExp
-    // const [aboutUp,setAboutUp]=useState([])
+    const [newExp,setNewExp]=useState([])
     const [error,setError]=useState('')
     let subtitle;
     let userInfo=useSelector(state=>state.user.value)
@@ -80,6 +80,18 @@ const Profile = () => {
 
             })
             setAboutUp(array)
+        });
+        // new addExprerience data
+        const expRef = ref(db, 'addExprerience');
+        onValue(expRef, (snapshot) => {
+            let array=[]
+            snapshot.forEach((item)=>{
+                if(userInfo.uid==item.val().upId){
+                    array.push(item.val())
+                }
+
+            })
+            setNewExp(array)
         });
     },[])
     // about profile input change
@@ -124,9 +136,6 @@ const Profile = () => {
     }
     //    handle about logo click
     const handleAboutClick =()=>{
-        // if(!about){
-
-        // }
         set(ref(db, 'updateAbout/'+userInfo.uid), {
             aboutText:about,
             upId:userInfo.uid
@@ -160,7 +169,15 @@ const Profile = () => {
     }
     // handle exprerience form submit
     const submitExp =(e)=>{
-        
+        set(push(ref(db, 'addExprerience')), {
+            title:addExp.title,
+            company:addExp.company,
+            description:addExp.description,
+            upId:userInfo.uid
+        }).then(()=>{
+            setExperienceOpen(false);
+        })
+
         e.preventDefault()
     }
 
@@ -249,21 +266,19 @@ const Profile = () => {
                             <BsBrowserChrome className='text-5xl inline-block'/>
                         </div>
                     </div>
-                    <div className="col-span-6">
-                        <Paragraph className='font-bold text-2xl' text='Freelance UX/UI designer'/>
-                        <div className="flex gap-5 my-3">
-                            <Paragraph text='Self Employed'/>
-                            <Paragraph text='Around the world'/>
-                        </div>
-                        <div className="flex gap-5 my-3">
-                            <Paragraph text='Jun 2016 — Present'/>
-                            <Paragraph link='3 yrs 3 mos'/>
-                        </div>
-                        <Paragraph text='Work with clients and web studios as freelancer.  Work in next areas: eCommerce web projects; creative landing pages; iOs and Android apps; corporate web sites and corporate identity sometimes.'/>
-                    </div>
+                    {newExp&&
+                        newExp.map((item)=>(
+                        <div key={item.upId} className="col-span-6 relative">
+                              <EditLogo className={`absolute top-10 right-10`} onClick={handleExperience} icone={<BiSolidEditAlt />}/>
+                            <h3 className='text-2xl text-white'>{item.title}</h3>
+                            <Paragraph className='my-3' text={item.company}/>
+                            <Paragraph text={item.description}/>
+                        </div> 
+                        ))
+                    }
                 </div>
                 {/* ///// */}
-                <div className="grid grid-cols-7 my-10">
+                {/* <div className="grid grid-cols-7 my-10">
                     <div className="col-span-1">
                         <div className='p-5 bg-primary rounded-full inline-block'>
                             <BiLogoUpwork className='text-5xl inline-block'/>
@@ -281,7 +296,7 @@ const Profile = () => {
                         </div>
                         <Paragraph text='Work with clients and web studios as freelancer.  Work in next areas: eCommerce web projects; creative landing pages; iOs and Android apps; corporate web sites and corporate identity sometimes.'/>
                     </div>
-                </div>
+                </div> */}
             </div>
             {/*=============== Education =============*/}
             <div className='bg-gray-900 p-10 my-10 text-white relative'>
@@ -317,11 +332,11 @@ const Profile = () => {
         <form onSubmit={handleUpSubmit} className='p-5 text-center'>
             <div>
                 <Paragraph text='name :' className='py-2'/>
-                <input type='text' name='name' className='ring bg-transparent py-2 px-5 w-full' placeholder='name' onChange={handleChang} value={name} />
+                <input type='text' name='name' className='ring bg-transparent py-2 px-5 w-full' placeholder='name' onChange={handleChang} value={name} required />
             </div>
             <div>
                 <Paragraph text='discription :' className='py-2'/>
-                <textarea type='text' name='discription' className='ring bg-transparent py-2 px-5 w-full' cols="50" rows="5" placeholder='discription' onChange={handleChang} value={discription} />
+                <textarea type='text' name='discription' className='ring bg-transparent py-2 px-5 w-full' cols="50" rows="5" placeholder='discription' onChange={handleChang} value={discription} required />
             </div>
             <Button className='mt-5' text='update'/>
         </form>
@@ -339,7 +354,7 @@ const Profile = () => {
         </div>
         <Hadding className='text-center py-4 text-white' text='updete your about'/>
             <div className='text-center'>
-                <textarea onChange={handleAboutChange} name="aboutText" id="" cols="50" rows="10" className='bg-transparent text-white ring p-2'/>
+                <textarea onChange={handleAboutChange} name="aboutText" id="" cols="50" rows="10" className='bg-transparent text-white ring p-2' required/>
                 <Button onclick={handleAboutClick} className='mt-5' text='update'/>
             </div>
       </Modal>
