@@ -6,6 +6,7 @@ import SR from '../assets/sr.jpg'
 import Hadding from '../components/hadding/Hadding'
 import Paragraph from '../components/paragraph/Paragraph'
 import {FaLinkedin} from 'react-icons/fa'
+import { FaPlusMinus } from "react-icons/fa6";
 import {IoIosSend } from 'react-icons/io'
 import {AiOutlineClose} from 'react-icons/ai'
 import {BsBrowserChrome} from 'react-icons/bs'
@@ -15,6 +16,8 @@ import Button from '../components/button/Button'
 import Modal from 'react-modal';
 import { getDatabase, ref, onValue, set } from "firebase/database";
 import { useSelector } from 'react-redux'
+import EditLogo from '../components/edit-logo/EditLogo'
+import {toast } from 'react-toastify';
 
 const customStyles = {
     content: {
@@ -32,13 +35,25 @@ const customStyles = {
 
 const Profile = () => {
     const db = getDatabase();
+    // profile useState
     const [upProfile,setUpProfile]=useState({name:'',discription:''})
     let {name,discription}=upProfile
     const [profile,setProfile]=useState([])
     const [profileOpen, setProfileOpen] = React.useState(false);
+    // about useState===============
     const [aboutOpen, setAboutOpen] = React.useState(false);
     const [about,setAbout]=useState('')
     const [aboutUp,setAboutUp]=useState([])
+    // project useState==========
+    const [projectOpen, setProjectOpen] = React.useState(false);
+    // const [about,setAbout]=useState('')
+    // const [aboutUp,setAboutUp]=useState([])
+    // experience useState===========
+    const [experienceOpen, setExperienceOpen] = React.useState(false);
+    const [addExp,setAddExp]=useState({title:'',company:'',description:''})
+    let {title,company,description}=addExp
+    // const [aboutUp,setAboutUp]=useState([])
+    const [error,setError]=useState('')
     let subtitle;
     let userInfo=useSelector(state=>state.user.value)
 
@@ -71,7 +86,7 @@ const Profile = () => {
     const handleChang =(e)=>{
         setUpProfile({...upProfile,[e.target.name]:e.target.value})
     }
-// handle profile update
+    //=============== handle profile=================
     const handleUpSubmit =(e)=>{
         set(ref(db, 'updateProfile/'+userInfo.uid), {
           name:upProfile.name,
@@ -85,42 +100,69 @@ const Profile = () => {
 
     function profileModal() {
         setProfileOpen(true);
-        // setUpProfile({name:`${name}`,discription:`${discription}`})
       }
-      function afterOpenModal() {
-        // references are now sync'd and can be accessed.
+      function profileOpenModal() {
         subtitle.style.color = '#fff';
       }
-      function closeModal() {
+      function profileCloseModal() {
         setProfileOpen(false);
       }
       
-    //   handle about update 
+    ///=============== handle about=================
     const handleAbout =()=>{
         setAboutOpen(true);
     }
-    function afterOpenModal() {
+    function aboutOpenModal() {
         subtitle.style.color = '#fff';
     }
-    function closeModal() {
+    function aboutCloseModal() {
         setAboutOpen(false);
     }
     // handle about input  change
     const handleAboutChange =(e)=>{
         setAbout(e.target.value);
     }
-//    handle about click
-const handleAboutClick =()=>{
-    // if(!about){
+    //    handle about logo click
+    const handleAboutClick =()=>{
+        // if(!about){
 
-    // }
-    set(ref(db, 'updateAbout/'+userInfo.uid), {
-        aboutText:about,
-        upId:userInfo.uid
-      }).then(()=>{
-        setAboutOpen(false);
-      })
-}
+        // }
+        set(ref(db, 'updateAbout/'+userInfo.uid), {
+            aboutText:about,
+            upId:userInfo.uid
+        }).then(()=>{
+            setAboutOpen(false);
+        })
+    }
+    //=============== handle project=================
+    const handleproject =()=>{
+        setProjectOpen(true);
+    }
+    function projectOpenModal() {
+        subtitle.style.color = '#fff';
+    }
+    function projectCloseModal() {
+        setProjectOpen(false);
+    }
+    //=============== handle experience=================
+    const handleExperience =()=>{
+        setExperienceOpen(true);
+    }
+    function experienceOpenModal() {
+        subtitle.style.color = '#fff';
+    }
+    function experienceCloseModal() {
+        setExperienceOpen(false);
+    }
+    // handle exprerience input chang
+    const handleExpChange =(e)=>{
+        setAddExp({...addExp,[e.target.name]:e.target.value})
+    }
+    // handle exprerience form submit
+    const submitExp =(e)=>{
+        
+        e.preventDefault()
+    }
 
   return (
     <div>
@@ -147,7 +189,7 @@ const handleAboutClick =()=>{
                                     ))
                                 }
                                 <FaLinkedin className='text-4xl text-primary'/>
-                                <BiSolidEditAlt onClick={profileModal} className='text-3xl cursor-pointer' />
+                                <EditLogo  onClick={profileModal} icone={<BiSolidEditAlt/>}/>
                             </div>
                             <div className='flex gap-3'>
                                 <IoIosSend className='text-primary'/>
@@ -172,7 +214,7 @@ const handleAboutClick =()=>{
             </div>
             {/*============ about me ===========*/}
             <div className='bg-gray-900 p-10 my-10 text-white relative'>
-            <BiSolidEditAlt onClick={handleAbout} className='absolute top-10 right-10 cursor-pointer text-3xl'/>
+                <EditLogo className={`absolute top-10 right-10`} onClick={handleAbout} icone={<BiSolidEditAlt/>}/>
                 <Hadding text='About Me'/>
                 {aboutUp&&aboutUp.map((item)=>(
                     <div key={item.upId}>
@@ -183,7 +225,7 @@ const handleAboutClick =()=>{
             </div>
             {/*================ project ============= */}
             <div className='bg-gray-900 p-10 my-10 text-white relative'>
-            <BiSolidEditAlt className='absolute top-10 right-10 cursor-pointer text-3xl'/>
+            <EditLogo className={`absolute top-10 right-10`} onClick={handleproject} icone={<BiSolidEditAlt/>}/>
                 <Hadding className='my-10' text='Porject'/>
                 <div className='grid grid-cols-3 gap-5'>
                     <div className="col-span-1">
@@ -199,7 +241,7 @@ const handleAboutClick =()=>{
             </div>
             {/*============ Experience ===============*/}
             <div className='bg-gray-900 p-10 my-10 text-white relative'>
-                <BiSolidEditAlt className='absolute top-10 right-10 cursor-pointer text-3xl'/>
+                <EditLogo className={`absolute top-10 right-10`} onClick={handleExperience} icone={<FaPlusMinus />}/>
                 <Hadding className='my-10' text='Experience'/>
                 <div className="grid grid-cols-7 my-10">
                     <div className="col-span-1">
@@ -263,23 +305,23 @@ const handleAboutClick =()=>{
         {/*============profile modal============  */}
         <Modal
         isOpen={profileOpen}
-        onAfterOpen={afterOpenModal}
-        onRequestClose={closeModal}
+        onAfterOpen={profileOpenModal}
+        onRequestClose={profileCloseModal}
         style={customStyles}
         contentLabel="Example Modal"
       >
-        <div onClick={closeModal} className='text-xl cursor-pointer text-white'>
+        <div onClick={profileCloseModal} className='text-xl cursor-pointer text-white'>
             <AiOutlineClose />
         </div>
         <Hadding className='text-center py-3 text-white' text='updete your profile'/>
         <form onSubmit={handleUpSubmit} className='p-5 text-center'>
             <div>
                 <Paragraph text='name :' className='py-2'/>
-                <input type='text' name='name' className='ring py-2 px-5 w-full' placeholder='name' onChange={handleChang} value={name} />
+                <input type='text' name='name' className='ring bg-transparent py-2 px-5 w-full' placeholder='name' onChange={handleChang} value={name} />
             </div>
             <div>
                 <Paragraph text='discription :' className='py-2'/>
-                <input type='text' name='discription' className='ring py-2 px-5 w-full' placeholder='discription' onChange={handleChang} value={discription} />
+                <textarea type='text' name='discription' className='ring bg-transparent py-2 px-5 w-full' cols="50" rows="5" placeholder='discription' onChange={handleChang} value={discription} />
             </div>
             <Button className='mt-5' text='update'/>
         </form>
@@ -287,12 +329,12 @@ const handleAboutClick =()=>{
       {/*============about modal============  */}
       <Modal
         isOpen={aboutOpen}
-        onAfterOpen={afterOpenModal}
-        onRequestClose={closeModal}
+        onAfterOpen={aboutOpenModal}
+        onRequestClose={aboutCloseModal}
         style={customStyles}
         contentLabel="Example Modal"
       >
-        <div onClick={closeModal} className='text-xl cursor-pointer text-white'>
+        <div onClick={aboutCloseModal} className='text-xl cursor-pointer text-white'>
             <AiOutlineClose />
         </div>
         <Hadding className='text-center py-4 text-white' text='updete your about'/>
@@ -300,6 +342,54 @@ const handleAboutClick =()=>{
                 <textarea onChange={handleAboutChange} name="aboutText" id="" cols="50" rows="10" className='bg-transparent text-white ring p-2'/>
                 <Button onclick={handleAboutClick} className='mt-5' text='update'/>
             </div>
+      </Modal>
+      {/*============project modal============  */}
+      <Modal
+        isOpen={projectOpen}
+        onAfterOpen={projectOpenModal}
+        onRequestClose={projectCloseModal}
+        style={customStyles}
+        contentLabel="Example Modal"
+      >
+        <div onClick={projectCloseModal} className='text-xl cursor-pointer text-white'>
+            <AiOutlineClose />
+        </div>
+        <Hadding className='text-center py-4 text-white' text='updete your project'/>
+        {/* <div className='text-center'>
+            <textarea onChange={handleAboutChange} name="aboutText" id="" cols="50" rows="10" className='bg-transparent text-white ring p-2'/>
+            <Button onclick={handleAboutClick} className='mt-5' text='update'/>
+        </div> */}
+      </Modal>
+      {/*============Experience modal============  */}
+      <Modal
+        isOpen={experienceOpen}
+        onAfterOpen={experienceOpenModal}
+        onRequestClose={experienceCloseModal}
+        style={customStyles}
+        contentLabel="Example Modal"
+      >
+        <div onClick={experienceCloseModal} className='text-xl cursor-pointer text-white'>
+            <AiOutlineClose />
+        </div>
+        <Hadding className='text-center py-4 text-white' text='Add your experience'/>
+            <form onSubmit={submitExp} action="">
+                <div className='text-white my-5'>
+                    <Paragraph text='Title'/>
+                    <input className='bg-transparent ring py-2 px-2 w-full mt-2' type="text" name='title' placeholder='title' onChange={handleExpChange} required />
+                </div>
+                <div className='text-white my-5'>
+                    <Paragraph text='Company'/>
+                    <input className='bg-transparent ring py-2 px-2 w-full mt-2' type="text" name='company' placeholder='company' onChange={handleExpChange} required />
+                </div>
+                <div className='text-white my-5'>
+                    <Paragraph text='Title'/>
+                    <textarea className='bg-transparent ring py-2 px-2 w-full mt-2' type="text" name='description' placeholder='description' cols="50" rows="5" onChange={handleExpChange} required />
+                </div>
+                <div className=' my-5'>
+                   <Button text='Submit'/>
+                </div>
+               
+            </form>
       </Modal>
     </div>
   )
