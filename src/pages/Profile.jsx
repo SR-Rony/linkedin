@@ -8,13 +8,13 @@ import Paragraph from '../components/paragraph/Paragraph'
 import {FaLinkedin} from 'react-icons/fa'
 import { FaPlusMinus } from "react-icons/fa6";
 import {IoIosSend } from 'react-icons/io'
-import {AiOutlineClose} from 'react-icons/ai'
+import {AiOutlineClose,AiFillDelete } from 'react-icons/ai'
 import {BsBrowserChrome} from 'react-icons/bs'
 import {BiLogoUpwork,BiSolidEditAlt} from 'react-icons/bi'
 import {IoMdSchool} from 'react-icons/io'
 import Button from '../components/button/Button'
 import Modal from 'react-modal';
-import { getDatabase, ref, onValue, set, push } from "firebase/database";
+import { getDatabase, ref, onValue, set, push,update,remove  } from "firebase/database";
 import { useSelector } from 'react-redux'
 import EditLogo from '../components/edit-logo/EditLogo'
 import {toast } from 'react-toastify';
@@ -53,7 +53,14 @@ const Profile = () => {
     const [addExp,setAddExp]=useState({title:'',company:'',description:''})
     let {title,company,description}=addExp
     const [newExp,setNewExp]=useState([])
-    const [error,setError]=useState('')
+    // experienc edit useState===========
+    const [expEdit,setExpEdit]=useState(false)
+    const [expItemId,setExpItemID]=useState('')
+    // const [experienceEditOpen, setExperienceEditOpen] = React.useState(false);
+    // const [addExp,setAddExp]=useState({title:'',company:'',description:''})
+    // let {title,company,description}=addExp
+    // const [newExp,setNewExp]=useState([])
+
     let subtitle;
     let userInfo=useSelector(state=>state.user.value)
 
@@ -87,7 +94,7 @@ const Profile = () => {
             let array=[]
             snapshot.forEach((item)=>{
                 if(userInfo.uid==item.val().upId){
-                    array.push(item.val())
+                    array.push({...item.val(),expId:item.key})
                 }
 
             })
@@ -156,6 +163,7 @@ const Profile = () => {
     //=============== handle experience=================
     const handleExperience =()=>{
         setExperienceOpen(true);
+        setExpEdit(false)
     }
     function experienceOpenModal() {
         subtitle.style.color = '#fff';
@@ -170,15 +178,42 @@ const Profile = () => {
     // handle exprerience form submit
     const submitExp =(e)=>{
         set(push(ref(db, 'addExprerience')), {
-            title:addExp.title,
-            company:addExp.company,
-            description:addExp.description,
+            title:title,
+            company:company,
+            description:description,
             upId:userInfo.uid
         }).then(()=>{
+            setAddExp({title:'',company:'',description:''})
             setExperienceOpen(false);
         })
 
         e.preventDefault()
+    }
+    // exprerience item edit button 
+    
+    
+
+    const handleExpEdit =(item)=>{
+        setExpEdit(true)
+        setExperienceOpen(true);
+        setAddExp({title:item.title,company:item.company,description:item.description})
+        setExpItemID(item.expId);
+    }
+    const updateExp =(e)=>{
+        update(ref(db, 'addExprerience/'+expItemId),{
+            title:title,
+            company:company,
+            description:description,
+            upId:userInfo.uid
+        }).then(()=>{
+            setAddExp({title:'',company:'',description:''})
+            setExperienceOpen(false);
+        })
+        e.preventDefault()
+    }
+    // exprerience item delete button 
+    const handleExpDelete =(id)=>{
+        remove(ref(db, 'addExprerience/'+id))
     }
 
   return (
@@ -260,23 +295,24 @@ const Profile = () => {
             <div className='bg-gray-900 p-10 my-10 text-white relative'>
                 <EditLogo className={`absolute top-10 right-10`} onClick={handleExperience} icone={<FaPlusMinus />}/>
                 <Hadding className='my-10' text='Experience'/>
-                <div className="grid grid-cols-7 my-10">
-                    <div className="col-span-1">
-                        <div className='p-5 bg-primary rounded-full inline-block'>
-                            <BsBrowserChrome className='text-5xl inline-block'/>
-                        </div>
-                    </div>
                     {newExp&&
                         newExp.map((item)=>(
-                        <div key={item.upId} className="col-span-6 relative">
-                              <EditLogo className={`absolute top-10 right-10`} onClick={handleExperience} icone={<BiSolidEditAlt />}/>
-                            <h3 className='text-2xl text-white'>{item.title}</h3>
-                            <Paragraph className='my-3' text={item.company}/>
-                            <Paragraph text={item.description}/>
-                        </div> 
+                        <div className="grid grid-cols-7 my-10 relative">
+                            <EditLogo className={`absolute top-10 right-20`} onClick={()=>handleExpEdit(item)} icone={<BiSolidEditAlt />}/>
+                            <EditLogo className={`absolute top-10 right-10 text-red-500`} onClick={()=>handleExpDelete(item.expId)} icone={<AiFillDelete  />}/>
+                            <div className="col-span-1">
+                                <div className='p-5 bg-primary rounded-full inline-block'>
+                                    <BsBrowserChrome className='text-5xl inline-block'/>
+                                </div>
+                            </div>
+                            <div key={item.upId} className="col-span-6">
+                                <h3 className='text-2xl text-white'>{item.title}</h3>
+                                <Paragraph className='my-3' text={item.company}/>
+                                <Paragraph text={item.description}/>
+                            </div> 
+                       </div>
                         ))
                     }
-                </div>
                 {/* ///// */}
                 {/* <div className="grid grid-cols-7 my-10">
                     <div className="col-span-1">
@@ -387,6 +423,40 @@ const Profile = () => {
             <AiOutlineClose />
         </div>
         <Hadding className='text-center py-4 text-white' text='Add your experience'/>
+            <form onSubmit={expEdit? updateExp : submitExp} action="">
+                <div className='text-white my-5'>
+                    <Paragraph text='Title'/>
+                    <input className='bg-transparent ring py-2 px-2 w-full mt-2' type="text" name='title' placeholder='title' onChange={handleExpChange} value={title} required />
+                </div>
+                <div className='text-white my-5'>
+                    <Paragraph text='Company'/>
+                    <input className='bg-transparent ring py-2 px-2 w-full mt-2' type="text" name='company' placeholder='company' onChange={handleExpChange} value={company} required />
+                </div>
+                <div className='text-white my-5'>
+                    <Paragraph text='Title'/>
+                    <textarea className='bg-transparent ring py-2 px-2 w-full mt-2' type="text" name='description' placeholder='description' cols="50" rows="5" onChange={handleExpChange} value={description} required />
+                </div>
+                <div className=' my-5'>
+                    {expEdit
+                    ?<Button text='Update'/>
+                    :<Button text='Add'/>
+                    }
+                </div>
+               
+            </form>
+      </Modal>
+       {/*============Experience item edit modal ============  */}
+       {/* <Modal
+        isOpen={experienceEditOpen}
+        onAfterOpen={experienceEditOpenModal}
+        onRequestClose={experienceEditCloseModal}
+        style={customStyles}
+        contentLabel="Example Modal"
+      >
+        <div onClick={experienceEditCloseModal} className='text-xl cursor-pointer text-white'>
+            <AiOutlineClose />
+        </div>
+        <Hadding className='text-center py-4 text-white' text='Edit your experience'/>
             <form onSubmit={submitExp} action="">
                 <div className='text-white my-5'>
                     <Paragraph text='Title'/>
@@ -405,7 +475,7 @@ const Profile = () => {
                 </div>
                
             </form>
-      </Modal>
+      </Modal> */}
     </div>
   )
 }
