@@ -56,10 +56,13 @@ const Profile = () => {
     // experienc edit useState===========
     const [expEdit,setExpEdit]=useState(false)
     const [expItemId,setExpItemID]=useState('')
-    // const [experienceEditOpen, setExperienceEditOpen] = React.useState(false);
-    // const [addExp,setAddExp]=useState({title:'',company:'',description:''})
-    // let {title,company,description}=addExp
-    // const [newExp,setNewExp]=useState([])
+    //Education useState===============
+    const [EducationOpen, setEducationOpen] = React.useState(false);
+    const [addEducation,setAddEducation]=useState({clgName:'',clgTitle:'',clgDescription:''})
+    let {clgName,clgTitle,clgDescription}=addEducation
+    const [NewEducation,setNewEducation]=useState([])
+    const [educationId,setEducationId]=useState('')
+    const [educationUp,setEducationUp]=useState(false)
 
     let subtitle;
     let userInfo=useSelector(state=>state.user.value)
@@ -99,6 +102,17 @@ const Profile = () => {
 
             })
             setNewExp(array)
+        });
+        // add education
+        const educationRef = ref(db, 'addEducation');
+        onValue(educationRef, (snapshot) => {
+            let array=[]
+            snapshot.forEach((item)=>{
+                if(userInfo.uid==item.val().upId){
+                    array.push({...item.val(),id:item.key})
+                }
+            })
+            setNewEducation(array)
         });
     },[])
     // about profile input change
@@ -190,9 +204,6 @@ const Profile = () => {
         e.preventDefault()
     }
     // exprerience item edit button 
-    
-    
-
     const handleExpEdit =(item)=>{
         setExpEdit(true)
         setExperienceOpen(true);
@@ -214,6 +225,61 @@ const Profile = () => {
     // exprerience item delete button 
     const handleExpDelete =(id)=>{
         remove(ref(db, 'addExprerience/'+id))
+    }
+    // handleEducation add button
+    const handleEducation =()=>{
+        setEducationUp(false)
+        setEducationOpen(true)
+    }
+    function educationOpenModal() {
+        subtitle.style.color = '#fff';
+    }
+    function educationCloseModal() {
+        setEducationOpen(false);
+    }
+    ///educationChange input
+    const educationChange =(e)=>{
+        setAddEducation({...addEducation,[e.target.name]:e.target.value})
+
+    }
+    // submitEducation
+    const submitEducation =(e)=>{
+        set(push(ref(db, 'addEducation')), {
+            name:clgName,
+            title:clgTitle,
+            description:clgDescription,
+            upId:userInfo.uid
+        }).then(()=>{
+            setAddEducation({clgName:'',clgTitle:'',clgDescription:''})
+            setEducationOpen(false);
+        })
+        e.preventDefault()
+    }
+    // handleEducationEdit button
+    const handleEducationEdit =(item)=>{
+        setEducationUp(true)
+        setEducationOpen(true)
+        setAddEducation({clgName:item.name,clgTitle:item.title,clgDescription:item.description})
+        setEducationId(item.id)
+    }
+
+    // editEducation submit
+    const editEducation =(e)=>{
+         update(ref(db, 'addEducation/'+educationId),{
+            name:clgName,
+            title:clgTitle,
+            description:clgDescription,
+            upId:userInfo.uid
+        }).then(()=>{
+            setAddEducation({clgName:'',clgTitle:'',clgDescription:''})
+            setEducationOpen(false);
+        })
+        e.preventDefault()
+    }
+
+    // handleEdcutaionDelete button
+    const handleEdcutaionDelete =(id)=>{
+        remove(ref(db, 'addEducation/'+id))
     }
 
   return (
@@ -299,7 +365,7 @@ const Profile = () => {
                         newExp.map((item)=>(
                         <div className="grid grid-cols-7 my-10 relative">
                             <EditLogo className={`absolute top-10 right-20`} onClick={()=>handleExpEdit(item)} icone={<BiSolidEditAlt />}/>
-                            <EditLogo className={`absolute top-10 right-10 text-red-500`} onClick={()=>handleExpDelete(item.expId)} icone={<AiFillDelete  />}/>
+                            <EditLogo className={`absolute top-10 right-10 `} onClick={()=>handleExpDelete(item.expId)} icone={<AiFillDelete  />}/>
                             <div className="col-span-1">
                                 <div className='p-5 bg-primary rounded-full inline-block'>
                                     <BsBrowserChrome className='text-5xl inline-block'/>
@@ -336,21 +402,25 @@ const Profile = () => {
             </div>
             {/*=============== Education =============*/}
             <div className='bg-gray-900 p-10 my-10 text-white relative'>
-            <BiSolidEditAlt className='absolute top-10 right-10 cursor-pointer text-3xl'/>
+            <EditLogo className={`absolute top-10 right-20`} onClick={handleEducation} icone={<FaPlusMinus />}/>
                 <Hadding className='my-10' text='Education'/>
-                <div className="grid grid-cols-7 my-10">
-                    <div className="col-span-1">
-                        <div className='p-5 bg-primary rounded-full inline-block'>
-                            <IoMdSchool className='text-5xl inline-block'/>
+                {NewEducation&& NewEducation.map((item)=>(
+                    <div key={item.id} className="grid grid-cols-7 my-10 relative">
+                        <EditLogo className={`absolute top-10 right-20`} onClick={()=>handleEducationEdit(item)} icone={<BiSolidEditAlt />}/>
+                            <EditLogo className={`absolute top-10 right-10 `} onClick={()=>handleEdcutaionDelete(item.id)} icone={<AiFillDelete  />}/>
+                        <div className="col-span-1">
+                            <div className='p-5 bg-primary rounded-full inline-block'>
+                                <IoMdSchool className='text-5xl inline-block'/>
+                            </div>
+                        </div>
+                        <div className="col-span-6">
+                            <h3 className='font-bold text-2xl'>{item.name}</h3>
+                            <Paragraph className='my-3' text={item.title}/>
+                            {/* <Paragraph className='my-3' text='2013 — 2017'/> */}
+                            <Paragraph text={item.description}/>
                         </div>
                     </div>
-                    <div className="col-span-6">
-                        <Paragraph className='font-bold text-2xl' text='Moscow State Linguistic University'/>
-                        <Paragraph className='my-3' text={`Bachelor's degree Field Of StudyComputer and Information Systems Security/Information Assurance`}/>
-                        <Paragraph className='my-3' text='2013 — 2017'/>
-                        <Paragraph text='Additional English classes and UX profile courses​.'/>
-                    </div>
-                </div>
+                ))}
             </div>
         </Container>
         {/*============profile modal============  */}
@@ -433,7 +503,7 @@ const Profile = () => {
                     <input className='bg-transparent ring py-2 px-2 w-full mt-2' type="text" name='company' placeholder='company' onChange={handleExpChange} value={company} required />
                 </div>
                 <div className='text-white my-5'>
-                    <Paragraph text='Title'/>
+                    <Paragraph text='description'/>
                     <textarea className='bg-transparent ring py-2 px-2 w-full mt-2' type="text" name='description' placeholder='description' cols="50" rows="5" onChange={handleExpChange} value={description} required />
                 </div>
                 <div className=' my-5'>
@@ -445,37 +515,40 @@ const Profile = () => {
                
             </form>
       </Modal>
-       {/*============Experience item edit modal ============  */}
-       {/* <Modal
-        isOpen={experienceEditOpen}
-        onAfterOpen={experienceEditOpenModal}
-        onRequestClose={experienceEditCloseModal}
+       {/*============Education modal ============  */}
+       <Modal
+        isOpen={EducationOpen}
+        onAfterOpen={educationOpenModal}
+        onRequestClose={educationCloseModal}
         style={customStyles}
         contentLabel="Example Modal"
       >
-        <div onClick={experienceEditCloseModal} className='text-xl cursor-pointer text-white'>
+        <div onClick={educationCloseModal} className='text-xl cursor-pointer text-white'>
             <AiOutlineClose />
         </div>
-        <Hadding className='text-center py-4 text-white' text='Edit your experience'/>
-            <form onSubmit={submitExp} action="">
+        <Hadding className='text-center py-4 text-white' text='Add your education'/>
+            <form onSubmit={educationUp?editEducation:submitEducation} action="">
                 <div className='text-white my-5'>
-                    <Paragraph text='Title'/>
-                    <input className='bg-transparent ring py-2 px-2 w-full mt-2' type="text" name='title' placeholder='title' onChange={handleExpChange} required />
+                    <Paragraph text='clgName'/>
+                    <input className='bg-transparent ring py-2 px-2 w-full mt-2' type="text" name='clgName' placeholder='clgName' onChange={educationChange} value={clgName} required />
                 </div>
                 <div className='text-white my-5'>
-                    <Paragraph text='Company'/>
-                    <input className='bg-transparent ring py-2 px-2 w-full mt-2' type="text" name='company' placeholder='company' onChange={handleExpChange} required />
+                    <Paragraph text='clgTitle'/>
+                    <input className='bg-transparent ring py-2 px-2 w-full mt-2' type="text" name='clgTitle' placeholder='clgTitle' onChange={educationChange} value={clgTitle} required />
                 </div>
                 <div className='text-white my-5'>
-                    <Paragraph text='Title'/>
-                    <textarea className='bg-transparent ring py-2 px-2 w-full mt-2' type="text" name='description' placeholder='description' cols="50" rows="5" onChange={handleExpChange} required />
+                    <Paragraph text='clgDescription'/>
+                    <textarea className='bg-transparent ring py-2 px-2 w-full mt-2' type="text" name='clgDescription' placeholder='description' cols="50" rows="5" onChange={educationChange} value={clgDescription} required />
                 </div>
                 <div className=' my-5'>
-                   <Button text='Submit'/>
+                    {educationUp
+                    ? <Button text='Update'/>
+                    : <Button text='Add'/>
+                    }
                 </div>
                
             </form>
-      </Modal> */}
+      </Modal>
     </div>
   )
 }
