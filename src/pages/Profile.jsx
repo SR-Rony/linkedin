@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState,createRef } from 'react'
 import Container from '../components/container/Container'
 import Images from '../components/images/Images'
 import coverImg from '../assets/cover.jpg'
@@ -18,6 +18,8 @@ import { getDatabase, ref, onValue, set, push,update,remove  } from "firebase/da
 import { useSelector } from 'react-redux'
 import EditLogo from '../components/edit-logo/EditLogo'
 import {toast } from 'react-toastify';
+import Cropper, { ReactCropperElement } from "react-cropper";
+import "cropperjs/dist/cropper.css";
 
 const customStyles = {
     content: {
@@ -32,6 +34,9 @@ const customStyles = {
     },
   };
   Modal.setAppElement('#root');
+
+  const defaultSrc =
+  "https://raw.githubusercontent.com/roadmanfong/react-cropper/master/example/img/child.jpg";
 
 const Profile = () => {
     const db = getDatabase();
@@ -63,7 +68,36 @@ const Profile = () => {
     const [NewEducation,setNewEducation]=useState([])
     const [educationId,setEducationId]=useState('')
     const [educationUp,setEducationUp]=useState(false)
+    // profile img uplod useState===========
+    const [profileImgOpen, setProfileImgOpen] = React.useState(false);
+    // const [about,setAbout]=useState('')
+    // const [aboutUp,setAboutUp]=useState([])
+    // img profile uplod img cropper=======================
+    const [image, setImage] = useState(defaultSrc);
+  const [cropData, setCropData] = useState("#");
+  const cropperRef = createRef<ReactCropperElement>();
+  const handleImgChange = (e) => {
+    console.log(e);
+    e.preventDefault();
+    // let files;
+    // if (e.dataTransfer) {
+    //   files = e.dataTransfer.files;
+    // } else if (e.target) {
+    //   files = e.target.files;
+    // }
+    // const reader = new FileReader();
+    // reader.onload = () => {
+    //   setImage(reader.result);
+    // };
+    // reader.readAsDataURL(files[0]);
+  };
 
+  const getCropData = () => {
+    if (typeof cropperRef.current?.cropper !== "undefined") {
+      setCropData(cropperRef.current?.cropper.getCroppedCanvas().toDataURL());
+    }
+  };
+////////////////
     let subtitle;
     let userInfo=useSelector(state=>state.user.value)
 
@@ -281,6 +315,16 @@ const Profile = () => {
     const handleEdcutaionDelete =(id)=>{
         remove(ref(db, 'addEducation/'+id))
     }
+    // handleImgUplod 
+    const handleImgUplod =()=>{
+        setProfileImgOpen(true)
+    }
+    function profileImgOpenModal() {
+        subtitle.style.color = '#fff';
+    }
+    function profileImgCloseModal() {
+        setProfileImgOpen(false);
+    }
 
   return (
     <div>
@@ -291,7 +335,7 @@ const Profile = () => {
             {/*=============== profile =============== */}
             <div className='bg-gray-900 py-10 grid grid-cols-4 px-10 relative'>
                 <div className="col-span-1">
-                    <div className='w-60 h-60  absolute top-0 left-20 translate-y-[-20px]'>
+                    <div onClick={handleImgUplod} className='w-60 h-60  absolute top-0 left-20 translate-y-[-20px] cursor-pointer'>
                         <Images className='h-full rounded-full ring-8 ring-gray-900' src={SR}/>
                     </div>
                 </div>
@@ -379,26 +423,6 @@ const Profile = () => {
                        </div>
                         ))
                     }
-                {/* ///// */}
-                {/* <div className="grid grid-cols-7 my-10">
-                    <div className="col-span-1">
-                        <div className='p-5 bg-primary rounded-full inline-block'>
-                            <BiLogoUpwork className='text-5xl inline-block'/>
-                        </div>
-                    </div>
-                    <div className="col-span-6">
-                        <Paragraph className='font-bold text-2xl' text='Freelance UX/UI designer'/>
-                        <div className="flex gap-5 my-3">
-                            <Paragraph text='Self Employed'/>
-                            <Paragraph text='Around the world'/>
-                        </div>
-                        <div className="flex gap-5 my-3">
-                            <Paragraph text='Jun 2016 — Present'/>
-                            <Paragraph link='3 yrs 3 mos'/>
-                        </div>
-                        <Paragraph text='Work with clients and web studios as freelancer.  Work in next areas: eCommerce web projects; creative landing pages; iOs and Android apps; corporate web sites and corporate identity sometimes.'/>
-                    </div>
-                </div> */}
             </div>
             {/*=============== Education =============*/}
             <div className='bg-gray-900 p-10 my-10 text-white relative'>
@@ -435,7 +459,7 @@ const Profile = () => {
             <AiOutlineClose />
         </div>
         <Hadding className='text-center py-3 text-white' text='updete your profile'/>
-        <form onSubmit={handleUpSubmit} className='p-5 text-center'>
+        <form onSubmit={handleUpSubmit} className='p-5 text-center text-white'>
             <div>
                 <Paragraph text='name :' className='py-2'/>
                 <input type='text' name='name' className='ring bg-transparent py-2 px-5 w-full' placeholder='name' onChange={handleChang} value={name} required />
@@ -548,6 +572,68 @@ const Profile = () => {
                 </div>
                
             </form>
+      </Modal>
+      {/*============profile img uplod modal ============  */}
+      <Modal
+        isOpen={profileImgOpen}
+        onAfterOpen={profileImgOpenModal}
+        onRequestClose={profileImgCloseModal}
+        style={customStyles}
+        contentLabel="Example Modal"
+      >
+        <div onClick={profileImgCloseModal} className='text-xl cursor-pointer text-white'>
+            <AiOutlineClose />
+        </div>
+        <Hadding className='text-center py-4 text-white' text='profile img uplod'/>
+        {/* ////////////////// */}
+        <input onChange={handleImgChange} type="file" />
+        {/* <div>
+      <div style={{ width: "100%" }}>
+        <input type="file" onChange={onChange} />
+        <button>Use default img</button>
+        <br />
+        <br />
+        <Cropper
+          ref={cropperRef}
+          style={{ height: 400, width: "100%" }}
+          zoomTo={0.5}
+          initialAspectRatio={1}
+          preview=".img-preview"
+          src={image}
+          viewMode={1}
+          minCropBoxHeight={10}
+          minCropBoxWidth={10}
+          background={false}
+          responsive={true}
+          autoCropArea={1}
+          checkOrientation={false} // https://github.com/fengyuanchen/cropperjs/issues/671
+          guides={true}
+        />
+      </div>
+      <div>
+        <div className="box" style={{ width: "50%", float: "right" }}>
+          <h1>Preview</h1>
+          <div
+            className="img-preview"
+            style={{ width: "100%", float: "left", height: "300px" }}
+          />
+        </div>
+        <div
+          className="box"
+          style={{ width: "50%", float: "right", height: "300px" }}
+        >
+          <h1>
+            <span>Crop</span>
+            <button style={{ float: "right" }} onClick={getCropData}>
+              Crop Image
+            </button>
+          </h1>
+          <img style={{ width: "100%" }} src={cropData} alt="cropped" />
+        </div>
+      </div>
+      <br style={{ clear: "both" }} />
+    </div> */}
+        {/* /////////////////// */}
       </Modal>
     </div>
   )
