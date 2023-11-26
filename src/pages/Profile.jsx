@@ -14,12 +14,13 @@ import {BiLogoUpwork,BiSolidEditAlt} from 'react-icons/bi'
 import {IoMdSchool} from 'react-icons/io'
 import Button from '../components/button/Button'
 import Modal from 'react-modal';
-import { getDatabase, ref, onValue, set, push,update,remove  } from "firebase/database";
+import { getDatabase, ref, onValue, set, push,update,remove,  } from "firebase/database";
 import { useSelector } from 'react-redux'
 import EditLogo from '../components/edit-logo/EditLogo'
 import {toast } from 'react-toastify';
-import Cropper, { ReactCropperElement } from "react-cropper";
+import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
+import { getStorage, ref as upRef, uploadString ,getDownloadURL} from "firebase/storage";
 
 const customStyles = {
     content: {
@@ -75,31 +76,29 @@ const Profile = () => {
     // img profile uplod img cropper=======================
     const [image, setImage] = useState(defaultSrc);
   const [cropData, setCropData] = useState("#");
-  const cropperRef = createRef<ReactCropperElement>();
+  const cropperRef = createRef;
   const handleImgChange = (e) => {
     console.log(e);
     e.preventDefault();
-    // let files;
-    // if (e.dataTransfer) {
-    //   files = e.dataTransfer.files;
-    // } else if (e.target) {
-    //   files = e.target.files;
-    // }
-    // const reader = new FileReader();
-    // reader.onload = () => {
-    //   setImage(reader.result);
-    // };
-    // reader.readAsDataURL(files[0]);
+    let files;
+    if (e.dataTransfer) {
+      files = e.dataTransfer.files;
+    } else if (e.target) {
+      files = e.target.files;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImage(reader.result);
+    };
+    reader.readAsDataURL(files[0]);
   };
 
-  const getCropData = () => {
-    if (typeof cropperRef.current?.cropper !== "undefined") {
-      setCropData(cropperRef.current?.cropper.getCroppedCanvas().toDataURL());
-    }
-  };
+ 
 ////////////////
     let subtitle;
     let userInfo=useSelector(state=>state.user.value)
+    const storage = getStorage();
+    const storageRef = upRef(storage, 'some-child');
 
     useEffect(()=>{
         const updateProfileRef = ref(db, 'updateProfile');
@@ -149,6 +148,34 @@ const Profile = () => {
             setNewEducation(array)
         });
     },[])
+    /////////////////////////
+    const getCropData = () => {
+        console.log('ami');
+        if (typeof cropperRef.current?.cropper!== "undefined") {
+            console.log('achi');
+            const message4 = cropperRef.current?.cropper.getCroppedCanvas().toDataURL();
+            uploadString(storageRef, message4, 'data_url').then((snapshot) => {
+              console.log('Uploaded a data_url string!');
+            //   getDownloadURL(snapshot.ref).then((downloadURL) => {
+            //     console.log('File available at', downloadURL);
+            //     set(dataRef(db, 'users/' + data.uid), {
+            //       username: data.displayName,
+            //       email: data.email,
+            //       profile_picture :downloadURL
+            //     }).then(()=>{
+            //       localStorage.setItem('user',JSON.stringify({...data,photoURL:downloadURL}))
+            //       dispatch(userLogin({...data,photoURL:downloadURL}));
+            //     }).then(()=>{
+            //       setOpen(false)
+            //     })
+            //   });
+            });
+        }else{
+            console.log('nai');
+        }
+      };
+
+
     // about profile input change
     const handleChang =(e)=>{
         setUpProfile({...upProfile,[e.target.name]:e.target.value})
@@ -587,9 +614,9 @@ const Profile = () => {
         <Hadding className='text-center py-4 text-white' text='profile img uplod'/>
         {/* ////////////////// */}
         <input onChange={handleImgChange} type="file" />
-        {/* <div>
+        <div>
       <div style={{ width: "100%" }}>
-        <input type="file" onChange={onChange} />
+        {/* <input type="file" onChange={} /> */}
         <button>Use default img</button>
         <br />
         <br />
@@ -622,17 +649,11 @@ const Profile = () => {
           className="box"
           style={{ width: "50%", float: "right", height: "300px" }}
         >
-          <h1>
-            <span>Crop</span>
-            <button style={{ float: "right" }} onClick={getCropData}>
-              Crop Image
-            </button>
-          </h1>
-          <img style={{ width: "100%" }} src={cropData} alt="cropped" />
+         <Button onclick={getCropData} text='Uplod Img'/>
         </div>
       </div>
       <br style={{ clear: "both" }} />
-    </div> */}
+    </div>
         {/* /////////////////// */}
       </Modal>
     </div>
