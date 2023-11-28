@@ -1,5 +1,4 @@
 import React,{useEffect, useState} from 'react'
-import Hadding from '../components/hadding/Hadding'
 import {FaLinkedin} from 'react-icons/fa'
 import {AiFillEyeInvisible,AiFillEye} from 'react-icons/ai'
 import Button from '../components/button/Button'
@@ -10,6 +9,7 @@ import { RotatingLines } from 'react-loader-spinner'
 import {toast } from 'react-toastify';
 import { useSelector,useDispatch } from 'react-redux'
 import { userData } from '../slices/userSlice'
+import Heading from '../components/heading/Heading'
 
 const Login = () => {
   const auth = getAuth();
@@ -99,7 +99,7 @@ const Login = () => {
     <div className='grid justify-center items-center bg-gray-900 h-screen'>
       <div className='bg-white p-10 text-center'>
         <FaLinkedin className='inline-block mx-auto text-4xl text-primary mb-10'/>
-        <Hadding text={`Get started with easily`} span=' login'/>
+        <Heading text={`Get started with easily`} span=' login'/>
         <form onSubmit={handleSubmit} className='my-10' action="">
           <div>
             <input className='w-full py-3 px-5 ring ring-primary focus-visible:ring-0 my-5' onChange={handleChange} type="email" name='email' value={email} placeholder='email'/>

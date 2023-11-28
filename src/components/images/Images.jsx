@@ -1,8 +1,8 @@
 import React from 'react'
 
-const Images = ({src,className}) => {
+const Images = ({src,className,onClick}) => {
   return (
-    <img className={`${className} w-full object-cover`} src={src} alt="img" />
+    <img onClick={onClick} className={`${className} w-full object-cover cursor-pointer`} src={src} alt="img" />
   )
 }
 

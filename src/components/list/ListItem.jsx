@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 
 const ListItem = ({text,className,path}) => {
   return (
-    <li className={className}><Link to={path}>{text}</Link></li>
+    <li className={`${className} font-nunito`}><Link to={path}>{text}</Link></li>
   )
 }
 

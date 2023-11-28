@@ -1,6 +1,5 @@
 import React from 'react'
 import Container from '../container/Container'
-import Hadding from '../hadding/Hadding'
 import Paragraph from '../paragraph/Paragraph'
 import List from '../list/List'
 import ListItem from '../list/ListItem'

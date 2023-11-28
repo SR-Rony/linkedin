@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import Hadding from '../components/hadding/Hadding'
 import {FaLinkedin} from 'react-icons/fa'
 import {AiFillEyeInvisible,AiFillEye} from 'react-icons/ai'
 import Button from '../components/button/Button'
@@ -9,6 +8,7 @@ import { RotatingLines } from 'react-loader-spinner'
 import { useNavigate } from 'react-router-dom'
 import {toast } from 'react-toastify';
 import { getDatabase,ref, set } from "firebase/database";
+import Heading from '../components/heading/Heading'
 
 const Register = () => {
   const db = getDatabase();
@@ -107,7 +107,7 @@ const Register = () => {
     <div className='grid justify-center items-center bg-gray-900 h-screen'>
         <div className='bg-white p-10 text-center'>
           <FaLinkedin className='inline-block mx-auto text-4xl text-primary mb-10'/>
-          <Hadding text={`Get started with easily`} span=' register'/>
+          <Heading text={`Get started with easily`} span=' register'/>
           <form onSubmit={handleSubmit} className='my-10' action="">
             <div className=''>
               <input className='w-full py-3 px-5 ring ring-primary focus-visible:ring-0 my-5' onChange={handleChange} type="text" name='fullName' value={fullName} placeholder='full name'/>

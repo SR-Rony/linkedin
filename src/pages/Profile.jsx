@@ -3,7 +3,6 @@ import Container from '../components/container/Container'
 import Images from '../components/images/Images'
 import coverImg from '../assets/cover.jpg'
 import SR from '../assets/sr.jpg'
-import Hadding from '../components/hadding/Hadding'
 import Paragraph from '../components/paragraph/Paragraph'
 import {FaLinkedin} from 'react-icons/fa'
 import { FaPlusMinus } from "react-icons/fa6";
@@ -20,7 +19,9 @@ import EditLogo from '../components/edit-logo/EditLogo'
 import {toast } from 'react-toastify';
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
-import { getStorage, ref as upRef, uploadString ,getDownloadURL} from "firebase/storage";
+import { getStorage, ref as upRef, uploadString,getDownloadURL} from "firebase/storage";
+import Heading from '../components/heading/Heading'
+import { useNavigate } from 'react-router-dom'
 
 const customStyles = {
     content: {
@@ -31,7 +32,7 @@ const customStyles = {
       marginRight: '-50%',
       transform: 'translate(-50%, -50%)',
       width:'500px',
-      background:'black',
+      background:'#111827',
     },
   };
   Modal.setAppElement('#root');
@@ -77,30 +78,24 @@ const Profile = () => {
     const [image, setImage] = useState(defaultSrc);
   const [cropData, setCropData] = useState("#");
   const cropperRef = createRef;
-  const handleImgChange = (e) => {
-    console.log(e);
-    e.preventDefault();
-    let files;
-    if (e.dataTransfer) {
-      files = e.dataTransfer.files;
-    } else if (e.target) {
-      files = e.target.files;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      setImage(reader.result);
-    };
-    reader.readAsDataURL(files[0]);
-  };
+  let navigate =useNavigate()
+  let userInfo=useSelector(state=>(state.user.value))
+
 
  
 ////////////////
     let subtitle;
-    let userInfo=useSelector(state=>state.user.value)
     const storage = getStorage();
     const storageRef = upRef(storage, 'some-child');
 
     useEffect(()=>{
+
+        if(!userInfo){
+            navigate('/login')
+          }else{
+              navigate('/profile')
+          }
+
         const updateProfileRef = ref(db, 'updateProfile');
         onValue(updateProfileRef, (snapshot) => {
             let array=[]
@@ -148,30 +143,42 @@ const Profile = () => {
             setNewEducation(array)
         });
     },[])
+    // handle images uplod==========
+    const handleImg = (e) => {
+        e.preventDefault();
+        let files;
+        if (e.dataTransfer) {
+          files = e.dataTransfer.files;
+        } else if (e.target) {
+          files = e.target.files;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+          setImage(reader.result);
+        };
+        reader.readAsDataURL(files[0]);
+      };
     /////////////////////////
     const getCropData = () => {
         console.log('ami');
-        if (typeof cropperRef.current?.cropper!== "undefined") {
-            console.log('achi');
-            const message4 = cropperRef.current?.cropper.getCroppedCanvas().toDataURL();
-            uploadString(storageRef, message4, 'data_url').then((snapshot) => {
-              console.log('Uploaded a data_url string!');
-            //   getDownloadURL(snapshot.ref).then((downloadURL) => {
-            //     console.log('File available at', downloadURL);
-            //     set(dataRef(db, 'users/' + data.uid), {
-            //       username: data.displayName,
-            //       email: data.email,
-            //       profile_picture :downloadURL
-            //     }).then(()=>{
-            //       localStorage.setItem('user',JSON.stringify({...data,photoURL:downloadURL}))
-            //       dispatch(userLogin({...data,photoURL:downloadURL}));
-            //     }).then(()=>{
-            //       setOpen(false)
-            //     })
-            //   });
-            });
-        }else{
-            console.log('nai');
+        if (typeof cropperRef.current?.cropper !== "undefined"){
+          const message4 = cropperRef.current?.cropper.getCroppedCanvas().toDataURL();
+          uploadString(storageRef, message4, 'data_url').then((snapshot) => {
+            console.log('Uploaded a data_url string!');
+            // getDownloadURL(snapshot.ref).then((downloadURL) => {
+            //   console.log('File available at', downloadURL);
+            //   set(dataRef(db, 'users/' + data.uid), {
+            //     username: data.displayName,
+            //     email: data.email,
+            //     profile_picture :downloadURL
+            //   }).then(()=>{
+            //     localStorage.setItem('user',JSON.stringify({...data,photoURL:downloadURL}))
+            //     dispatch(userLogin({...data,photoURL:downloadURL}));
+            //   }).then(()=>{
+            //     setOpen(false)
+            //   })
+            // });
+          });
         }
       };
 
@@ -354,26 +361,26 @@ const Profile = () => {
     }
 
   return (
-    <div>
+    <div className='pt-28'>
         <Container>
             <div className='relative'>
                 <Images className='h-60' src={coverImg}/>
             </div>
             {/*=============== profile =============== */}
-            <div className='bg-gray-900 py-10 grid grid-cols-4 px-10 relative'>
+            <div className='bg-bg_promary py-10 grid grid-cols-4 px-10 relative'>
                 <div className="col-span-1">
                     <div onClick={handleImgUplod} className='w-60 h-60  absolute top-0 left-20 translate-y-[-20px] cursor-pointer'>
-                        <Images className='h-full rounded-full ring-8 ring-gray-900' src={SR}/>
+                        <Images className='h-full rounded-full ring-8 ring-bg_promary' src={SR}/>
                     </div>
                 </div>
                 <div className="col-span-3 text-white">
                     <div className='flex justify-between'>
                             <div className="flex gap-5 items-center mb-10">
                                 {profile.length==0
-                                    ?<Hadding text={userInfo.displayName}/>
+                                    ?<Heading text={userInfo.displayName}/>
                                     :profile.map((item)=>(
                                         <div key={item.upId}>
-                                            <Hadding text={item.name}/>
+                                            <Heading text={item.name}/>
                                         </div>
                                     ))
                                 }
@@ -396,15 +403,15 @@ const Profile = () => {
                     <Button className='mt-10' text='Contact Me'/>
                 </div>
             </div>
-            <div className="flex gap-2 py-10 my-10 bg-gray-200 justify-center">
+            <div className="flex gap-2 py-10 my-10 bg-bg_secoundary justify-center">
                 <Paragraph className='w-60 py-5 text-center bg-white text-primary hover:text-white hover:bg-primary' text='PROFILE'/>
                 <Paragraph className='w-60 text-center py-5 bg-white text-primary hover:text-white hover:bg-primary' text='FRIENDS'/>
                 <Paragraph className='w-60 text-center py-5 bg-white text-primary hover:text-white hover:bg-primary' text='POST'/>
             </div>
             {/*============ about me ===========*/}
-            <div className='bg-gray-900 p-10 my-10 text-white relative'>
+            <div className='bg-bg_promary p-10 my-10 text-white relative'>
                 <EditLogo className={`absolute top-10 right-10`} onClick={handleAbout} icone={<BiSolidEditAlt/>}/>
-                <Hadding text='About Me'/>
+                <Heading text='About Me'/>
                 {aboutUp&&aboutUp.map((item)=>(
                     <div key={item.upId}>
                         <Paragraph className='my-5 pr-10 text-white' text={item.aboutText}/>
@@ -413,9 +420,9 @@ const Profile = () => {
                 <Button text='Read more'/>
             </div>
             {/*================ project ============= */}
-            <div className='bg-gray-900 p-10 my-10 text-white relative'>
+            <div className='bg-bg_promary p-10 my-10 text-white relative'>
             <EditLogo className={`absolute top-10 right-10`} onClick={handleproject} icone={<BiSolidEditAlt/>}/>
-                <Hadding className='my-10' text='Porject'/>
+                <Heading className='my-10' text='Porject'/>
                 <div className='grid grid-cols-3 gap-5'>
                     <div className="col-span-1">
                         <Images src={coverImg}/>
@@ -429,9 +436,9 @@ const Profile = () => {
                 </div>
             </div>
             {/*============ Experience ===============*/}
-            <div className='bg-gray-900 p-10 my-10 text-white relative'>
+            <div className='bg-bg_promary p-10 my-10 text-white relative'>
                 <EditLogo className={`absolute top-10 right-10`} onClick={handleExperience} icone={<FaPlusMinus />}/>
-                <Hadding className='my-10' text='Experience'/>
+                <Heading className='my-10' text='Experience'/>
                     {newExp&&
                         newExp.map((item)=>(
                         <div className="grid grid-cols-7 my-10 relative">
@@ -452,9 +459,9 @@ const Profile = () => {
                     }
             </div>
             {/*=============== Education =============*/}
-            <div className='bg-gray-900 p-10 my-10 text-white relative'>
+            <div className='bg-bg_promary p-10 my-10 text-white relative'>
             <EditLogo className={`absolute top-10 right-20`} onClick={handleEducation} icone={<FaPlusMinus />}/>
-                <Hadding className='my-10' text='Education'/>
+                <Heading className='my-10' text='Education'/>
                 {NewEducation&& NewEducation.map((item)=>(
                     <div key={item.id} className="grid grid-cols-7 my-10 relative">
                         <EditLogo className={`absolute top-10 right-20`} onClick={()=>handleEducationEdit(item)} icone={<BiSolidEditAlt />}/>
@@ -485,7 +492,7 @@ const Profile = () => {
         <div onClick={profileCloseModal} className='text-xl cursor-pointer text-white'>
             <AiOutlineClose />
         </div>
-        <Hadding className='text-center py-3 text-white' text='updete your profile'/>
+        <Heading className='text-center py-3 text-white' text='updete your profile'/>
         <form onSubmit={handleUpSubmit} className='p-5 text-center text-white'>
             <div>
                 <Paragraph text='name :' className='py-2'/>
@@ -509,7 +516,7 @@ const Profile = () => {
         <div onClick={aboutCloseModal} className='text-xl cursor-pointer text-white'>
             <AiOutlineClose />
         </div>
-        <Hadding className='text-center py-4 text-white' text='updete your about'/>
+        <Heading className='text-center py-4 text-white' text='updete your about'/>
             <div className='text-center'>
                 <textarea onChange={handleAboutChange} name="aboutText" id="" cols="50" rows="10" className='bg-transparent text-white ring p-2' required/>
                 <Button onclick={handleAboutClick} className='mt-5' text='update'/>
@@ -526,7 +533,7 @@ const Profile = () => {
         <div onClick={projectCloseModal} className='text-xl cursor-pointer text-white'>
             <AiOutlineClose />
         </div>
-        <Hadding className='text-center py-4 text-white' text='updete your project'/>
+        <Heading className='text-center py-4 text-white' text='updete your project'/>
         {/* <div className='text-center'>
             <textarea onChange={handleAboutChange} name="aboutText" id="" cols="50" rows="10" className='bg-transparent text-white ring p-2'/>
             <Button onclick={handleAboutClick} className='mt-5' text='update'/>
@@ -543,7 +550,7 @@ const Profile = () => {
         <div onClick={experienceCloseModal} className='text-xl cursor-pointer text-white'>
             <AiOutlineClose />
         </div>
-        <Hadding className='text-center py-4 text-white' text='Add your experience'/>
+        <Heading className='text-center py-4 text-white' text='Add your experience'/>
             <form onSubmit={expEdit? updateExp : submitExp} action="">
                 <div className='text-white my-5'>
                     <Paragraph text='Title'/>
@@ -577,7 +584,7 @@ const Profile = () => {
         <div onClick={educationCloseModal} className='text-xl cursor-pointer text-white'>
             <AiOutlineClose />
         </div>
-        <Hadding className='text-center py-4 text-white' text='Add your education'/>
+        <Heading className='text-center py-4 text-white' text='Add your education'/>
             <form onSubmit={educationUp?editEducation:submitEducation} action="">
                 <div className='text-white my-5'>
                     <Paragraph text='clgName'/>
@@ -611,12 +618,11 @@ const Profile = () => {
         <div onClick={profileImgCloseModal} className='text-xl cursor-pointer text-white'>
             <AiOutlineClose />
         </div>
-        <Hadding className='text-center py-4 text-white' text='profile img uplod'/>
+        <Heading className='text-center py-4 text-white' text='profile img uplod'/>
         {/* ////////////////// */}
-        <input onChange={handleImgChange} type="file" />
         <div>
       <div style={{ width: "100%" }}>
-        {/* <input type="file" onChange={} /> */}
+        <input type="file" onChange={handleImg} />
         <button>Use default img</button>
         <br />
         <br />
@@ -649,7 +655,13 @@ const Profile = () => {
           className="box"
           style={{ width: "50%", float: "right", height: "300px" }}
         >
-         <Button onclick={getCropData} text='Uplod Img'/>
+          <h1>
+            <span>Crop</span>
+            <button className='text-white' style={{ float: "right" }} onClick={getCropData}>
+              Crop Image
+            </button>
+          </h1>
+          <img style={{ width: "100%" }} src={cropData} alt="cropped" />
         </div>
       </div>
       <br style={{ clear: "both" }} />

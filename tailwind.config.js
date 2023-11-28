@@ -8,6 +8,8 @@ export default {
     extend: {
       colors: {
         'primary': '#086FA4',
+        'bg_promary':'#111827',
+        'bg_secoundary':'#D1D5DB'
       },
       fontFamily: {
         'nunito': ['Nunito', 'sans-serif']
