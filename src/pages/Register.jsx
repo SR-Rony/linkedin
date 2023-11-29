@@ -54,7 +54,7 @@ const Register = () => {
     .then((user) => {
       setLodding(false)
       updateProfile(auth.currentUser, {
-        displayName: fullName, photoURL: "profile img"
+        displayName: fullName, photoURL: "https://firebasestorage.googleapis.com/v0/b/linkedin-73244.appspot.com/o/img.png?alt=media&token=e0ec3654-ea5c-49e3-b4ad-aa786f4415af"
       }).then(() => {
         sendEmailVerification(auth.currentUser)
         .then(() => {
@@ -62,7 +62,7 @@ const Register = () => {
           set(ref(db, 'users/'+user.user.uid),{
             userName: fullName,
             email: email,
-            profile_picture : 'profile pic'
+            profile_picture : 'https://firebasestorage.googleapis.com/v0/b/linkedin-73244.appspot.com/o/img.png?alt=media&token=e0ec3654-ea5c-49e3-b4ad-aa786f4415af'
           });
         });
       }).catch((error) => {

@@ -46,10 +46,11 @@ const Profile = () => {
     let navigate =useNavigate()
     let userInfo=useSelector(state=>(state.user.value))
     let dispatch =useDispatch()
+    const [user,setUser]=useState([])
     // profile useState
     const [upProfile,setUpProfile]=useState({name:'',discription:''})
     let {name,discription}=upProfile
-    const [profile,setProfile]=useState([])
+    // const [profile,setProfile]=useState([])
     const [profileOpen, setProfileOpen] = React.useState(false);
     // about useState===============
     const [aboutOpen, setAboutOpen] = React.useState(false);
@@ -96,9 +97,6 @@ const Profile = () => {
         };
         reader.readAsDataURL(files[0]);
       };
-
-
-
  
 ////////////////
     let subtitle;
@@ -112,18 +110,19 @@ const Profile = () => {
           }else{
               navigate('/profile')
           }
-
-        const updateProfileRef = dataRef(db, 'updateProfile');
-        onValue(updateProfileRef, (snapshot) => {
+          // firebase user info================
+        const userRef = dataRef(db, 'users');
+        onValue(userRef, (snapshot) => {
             let array=[]
             snapshot.forEach((item)=>{
-                if(userInfo.uid==item.val().upId){
-                    array.push(item.val())
+                if(userInfo.uid==item.key){
+                    array.push({...item.val(),id:item.key})
                 }
 
             })
-            setProfile(array)
+            setUser(array)
         });
+
         // about data
         const aboutRef = dataRef(db, 'updateAbout');
         onValue(aboutRef, (snapshot) => {
@@ -166,18 +165,23 @@ const Profile = () => {
     }
     //=============== handle profile=================
     const handleUpSubmit =(e)=>{
-        set(dataRef(db, 'updateProfile/'+userInfo.uid), {
-          name:upProfile.name,
-          discription:upProfile.discription,
-          upId:userInfo.uid
-        }).then(()=>{
-            setProfileOpen(false);
+        user.map((item)=>{
+            if(item.id==userInfo.uid){
+                set(dataRef(db, 'users/'+userInfo.uid), {
+                    ...item,
+                  userName:name,
+                  discription:discription,
+                }).then(()=>{
+                    setProfileOpen(false);
+                })
+            }
         })
         e.preventDefault()
     }
 
     function profileModal() {
         setProfileOpen(true);
+        setUpProfile({name:userInfo.displayName,discription:userInfo.discription})
       }
       function profileOpenModal() {
         subtitle.style.color = '#fff';
@@ -345,7 +349,7 @@ const Profile = () => {
             getDownloadURL(snapshot.ref).then((downloadURL) => {
               console.log('File available at', downloadURL);
               set(dataRef(db, 'users/' + userInfo.uid), {
-                username:userInfo.displayName,
+                userName:userInfo.displayName,
                 email: userInfo.email,
                 profile_picture :downloadURL
               }).then(()=>{
@@ -359,7 +363,6 @@ const Profile = () => {
           });
         }
       };
-      console.log(userInfo);
 
   return (
     <div className='pt-28'>
@@ -368,42 +371,30 @@ const Profile = () => {
                 <Images className='h-60' src={coverImg}/>
             </div>
             {/*=============== profile =============== */}
-            <div className='bg-bg_promary py-10 grid grid-cols-4 px-10 relative'>
-                <div className="col-span-1">
-                    <div onClick={handleImgUplod} className='w-60 h-60  absolute top-0 left-20 translate-y-[-20px] cursor-pointer'>
-                        <Images className='h-full rounded-full ring-8 ring-bg_promary' src={userInfo.photoURL}/>
+            {user.map((item)=>(
+                <div key={item.id} className='bg-bg_promary py-10 grid grid-cols-4 px-10 relative'>
+                    <div className="col-span-1">
+                        <div onClick={handleImgUplod} className='w-60 h-60  absolute top-0 left-20 translate-y-[-20px] cursor-pointer'>
+                            <Images className='h-full rounded-full ring-8 ring-bg_promary' src={item.profile_picture}/>
+                        </div>
+                    </div>
+                    <div className="col-span-3 text-white">
+                        <div className='flex justify-between'>
+                                <div className="flex gap-5 items-center mb-10">
+                                    <Heading text={item.userName}/>
+                                    <FaLinkedin className='text-4xl text-primary'/>
+                                    <EditLogo  onClick={profileModal} icone={<BiSolidEditAlt/>}/>
+                                </div>
+                                <div className='flex gap-3'>
+                                    <IoIosSend className='text-primary'/>
+                                    <Paragraph text='Saint Petersburg, Russian Federation'/>
+                                </div>
+                        </div>
+                        {item.discription&&<Paragraph text={item.discription}/>}
+                        <Button className='mt-10' text='Contact Me'/>
                     </div>
                 </div>
-                <div className="col-span-3 text-white">
-                    <div className='flex justify-between'>
-                            <div className="flex gap-5 items-center mb-10">
-                                {profile.length==0
-                                    ?<Heading text={userInfo.displayName}/>
-                                    :profile.map((item)=>(
-                                        <div key={item.upId}>
-                                            <Heading text={item.name}/>
-                                        </div>
-                                    ))
-                                }
-                                <FaLinkedin className='text-4xl text-primary'/>
-                                <EditLogo  onClick={profileModal} icone={<BiSolidEditAlt/>}/>
-                            </div>
-                            <div className='flex gap-3'>
-                                <IoIosSend className='text-primary'/>
-                                <Paragraph text='Saint Petersburg, Russian Federation'/>
-                            </div>
-                    </div>
-                    {profile.length==0
-                        ?<Paragraph text='add description '/>
-                        :profile.map((item)=>(
-                            <div key={item.upId}>
-                                <Paragraph text={item.discription}/>
-                            </div>
-                        ))
-                    }
-                    <Button className='mt-10' text='Contact Me'/>
-                </div>
-            </div>
+            ))}
             <div className="flex gap-2 py-10 my-10 bg-bg_secoundary justify-center">
                 <Paragraph className='w-60 py-5 text-center bg-white text-primary hover:text-white hover:bg-primary' text='PROFILE'/>
                 <Paragraph className='w-60 text-center py-5 bg-white text-primary hover:text-white hover:bg-primary' text='FRIENDS'/>

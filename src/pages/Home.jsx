@@ -34,33 +34,18 @@ let userInfo=useSelector(state=>(state.user.value))
     }else{
       navigate('/home')
     }
-    // firebase update profile info==================
-    const updateProfileRef = ref(db, 'updateProfile');
-        onValue(updateProfileRef, (snapshot) => {
-            let array=[]
-            snapshot.forEach((item)=>{
-                if(userInfo.uid==item.val().upId){
-                    array.push(item.val())
-                }
-
-            })
-            setProfile(array)
-        });
         // firebase user info================
         const userRef = ref(db, 'users');
         onValue(userRef, (snapshot) => {
             let array=[]
             snapshot.forEach((item)=>{
-                if(userInfo.uid!=item.key){
-                    array.push({...item.val(),id:item.key})
-                }
+              if(userInfo.uid!=item.key)
+                  array.push({...item.val(),id:item.key})
 
             })
             setUser(array)
         });
   },[])
-
-console.log(user);
 
 
   return (
@@ -73,18 +58,8 @@ console.log(user);
                 <div onClick={handleProfile} className=' w-24 h-24 rounded-full object-cover absolute top-20 left-1/2 translate-x-[-50%] ring-4 ring-bg_promary cursor-pointer overflow-hidden'>
                 <Images src={userInfo.photoURL}/>
                 </div>
-                {profile.length==0
-                    ?<>
-                      <Heading className='text-center pt-16' text={userInfo.displayName}/>
-                      <Paragraph text='add description' className='text-center py-3 border-b-2 border-primary'/>
-                    </>
-                    :profile.map((item)=>(
-                        <div key={item.upId}>
-                            <Heading className='text-center pt-16' text={item.name}/>
-                            <Paragraph text={item.discription} className='text-center py-3 border-b-2 border-primary'/>
-                        </div>
-                    ))
-                }
+                <Heading className='text-center pt-16' text={userInfo.displayName}/>
+                {/* {user.map(item=>item.id==userInfo.uid&&<Paragraph text={userInfo.discription} className='text-center py-3 border-b-2 border-primary'/>)} */}
                 <h2 className='text-center cursor-pointer text-xl mt-2' onClick={handleProfile}>Vew Full Profile</h2>
               </div>
           </div>
@@ -154,13 +129,13 @@ console.log(user);
           <div className="col-span-1 bg-bg_promary  text-white h-screen rounded-xl p-5">
             <Heading className='text-center border-b-2 border-primary pb-5' text='All User'/>
             {user.map((item)=>(
-              <div className='flex justify-between items-center py-5'>
+              <div key={item.id} className='flex justify-between items-center py-5'>
                 <div className=' w-10 h-10 rounded-full ring-4 ring-primary overflow-hidden'>
                   <Images src={item.profile_picture}/>
                 </div>
-                <Paragraph text={item.username}/>
+                <Paragraph text={item.userName}/>
                 <Button text='requst'/>
-          </div>
+              </div>
             ))}
           </div>
         </div>
