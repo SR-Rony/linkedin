@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Container from '../components/container/Container'
 import Images from '../components/images/Images'
 import cover from '../assets/cover.jpg'
@@ -12,24 +12,55 @@ import { AiFillLike } from "react-icons/ai";
 import { BiRepost } from "react-icons/bi";
 import { MdPermMedia,MdEventNote,MdTextSnippet   } from "react-icons/md";
 import { useSelector } from 'react-redux'
+import { getDatabase, ref, onValue, set, push,update,remove,  } from "firebase/database";
+import Button from '../components/button/Button'
 
 
 const Home = () => {
+  const db = getDatabase();
 let navigate =useNavigate()
+const [profile,setProfile]=useState([])
+const [user,setUser]=useState([])
 
 // handleProfile
 const handleProfile =()=>{
   navigate('/profile')
 }
 let userInfo=useSelector(state=>(state.user.value))
+// console.log(userInfo);
   useEffect(()=>{
     if(!userInfo){
       navigate('/login')
     }else{
       navigate('/home')
     }
+    // firebase update profile info==================
+    const updateProfileRef = ref(db, 'updateProfile');
+        onValue(updateProfileRef, (snapshot) => {
+            let array=[]
+            snapshot.forEach((item)=>{
+                if(userInfo.uid==item.val().upId){
+                    array.push(item.val())
+                }
+
+            })
+            setProfile(array)
+        });
+        // firebase user info================
+        const userRef = ref(db, 'users');
+        onValue(userRef, (snapshot) => {
+            let array=[]
+            snapshot.forEach((item)=>{
+                if(userInfo.uid!=item.key){
+                    array.push({...item.val(),id:item.key})
+                }
+
+            })
+            setUser(array)
+        });
   },[])
 
+console.log(user);
 
 
   return (
@@ -40,10 +71,21 @@ let userInfo=useSelector(state=>(state.user.value))
               <div className=' relative  bg-bg_promary pb-5'>
                 <Images className='w-full h-32' src={cover}/>
                 <div onClick={handleProfile} className=' w-24 h-24 rounded-full object-cover absolute top-20 left-1/2 translate-x-[-50%] ring-4 ring-bg_promary cursor-pointer overflow-hidden'>
-                <Images src={img}/>
+                <Images src={userInfo.photoURL}/>
                 </div>
-                <Heading className='text-center pt-16' text={'SR Rony'}/>
-                <Paragraph text='frontend developer' className='text-center py-3 border-b-2 border-primary'/>
+                {profile.length==0
+                    ?<>
+                      <Heading className='text-center pt-16' text={userInfo.displayName}/>
+                      <Paragraph text='add description' className='text-center py-3 border-b-2 border-primary'/>
+                    </>
+                    :profile.map((item)=>(
+                        <div key={item.upId}>
+                            <Heading className='text-center pt-16' text={item.name}/>
+                            <Paragraph text={item.discription} className='text-center py-3 border-b-2 border-primary'/>
+                        </div>
+                    ))
+                }
+                <h2 className='text-center cursor-pointer text-xl mt-2' onClick={handleProfile}>Vew Full Profile</h2>
               </div>
           </div>
           <div className="col-span-3 rounded-xl overflow-hidden">
@@ -51,7 +93,7 @@ let userInfo=useSelector(state=>(state.user.value))
               <div className='grid grid-cols-7 '>
                 <div className="col-span-1">
                 <div className=' w-16 h-16 rounded-full ring-4 ring-primary overflow-hidden'>
-                  <Images src={img}/>
+                  <Images src={userInfo.photoURL}/>
                 </div>
                 </div>
                 <div className="col-span-6">
@@ -110,9 +152,16 @@ let userInfo=useSelector(state=>(state.user.value))
             </div>
           </div>
           <div className="col-span-1 bg-bg_promary  text-white h-screen rounded-xl p-5">
-          <div className='w-full '>
-              <Paragraph text='Add To Your Feed'/>
-            </div>
+            <Heading className='text-center border-b-2 border-primary pb-5' text='All User'/>
+            {user.map((item)=>(
+              <div className='flex justify-between items-center py-5'>
+                <div className=' w-10 h-10 rounded-full ring-4 ring-primary overflow-hidden'>
+                  <Images src={item.profile_picture}/>
+                </div>
+                <Paragraph text={item.username}/>
+                <Button text='requst'/>
+          </div>
+            ))}
           </div>
         </div>
       </Container>

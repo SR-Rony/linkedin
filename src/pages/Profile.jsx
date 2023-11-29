@@ -13,15 +13,16 @@ import {BiLogoUpwork,BiSolidEditAlt} from 'react-icons/bi'
 import {IoMdSchool} from 'react-icons/io'
 import Button from '../components/button/Button'
 import Modal from 'react-modal';
-import { getDatabase, ref, onValue, set, push,update,remove,  } from "firebase/database";
-import { useSelector } from 'react-redux'
+import { getDatabase, ref as dataRef, onValue, set, push,update,remove,  } from "firebase/database";
+import { useDispatch, useSelector } from 'react-redux'
 import EditLogo from '../components/edit-logo/EditLogo'
 import {toast } from 'react-toastify';
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
-import { getStorage, ref as upRef, uploadString,getDownloadURL} from "firebase/storage";
+import { getStorage, ref, uploadString,getDownloadURL} from "firebase/storage";
 import Heading from '../components/heading/Heading'
 import { useNavigate } from 'react-router-dom'
+import { userData } from '../slices/userSlice'
 
 const customStyles = {
     content: {
@@ -42,6 +43,9 @@ const customStyles = {
 
 const Profile = () => {
     const db = getDatabase();
+    let navigate =useNavigate()
+    let userInfo=useSelector(state=>(state.user.value))
+    let dispatch =useDispatch()
     // profile useState
     const [upProfile,setUpProfile]=useState({name:'',discription:''})
     let {name,discription}=upProfile
@@ -76,74 +80,8 @@ const Profile = () => {
     // const [aboutUp,setAboutUp]=useState([])
     // img profile uplod img cropper=======================
     const [image, setImage] = useState(defaultSrc);
-  const [cropData, setCropData] = useState("#");
-  const cropperRef = createRef;
-  let navigate =useNavigate()
-  let userInfo=useSelector(state=>(state.user.value))
-
-
- 
-////////////////
-    let subtitle;
-    const storage = getStorage();
-    const storageRef = upRef(storage, 'some-child');
-
-    useEffect(()=>{
-
-        if(!userInfo){
-            navigate('/login')
-          }else{
-              navigate('/profile')
-          }
-
-        const updateProfileRef = ref(db, 'updateProfile');
-        onValue(updateProfileRef, (snapshot) => {
-            let array=[]
-            snapshot.forEach((item)=>{
-                if(userInfo.uid==item.val().upId){
-                    array.push(item.val())
-                }
-
-            })
-            setProfile(array)
-        });
-        // about data
-        const aboutRef = ref(db, 'updateAbout');
-        onValue(aboutRef, (snapshot) => {
-            let array=[]
-            snapshot.forEach((item)=>{
-                if(userInfo.uid==item.val().upId){
-                    array.push(item.val())
-                }
-
-            })
-            setAboutUp(array)
-        });
-        // new addExprerience data
-        const expRef = ref(db, 'addExprerience');
-        onValue(expRef, (snapshot) => {
-            let array=[]
-            snapshot.forEach((item)=>{
-                if(userInfo.uid==item.val().upId){
-                    array.push({...item.val(),expId:item.key})
-                }
-
-            })
-            setNewExp(array)
-        });
-        // add education
-        const educationRef = ref(db, 'addEducation');
-        onValue(educationRef, (snapshot) => {
-            let array=[]
-            snapshot.forEach((item)=>{
-                if(userInfo.uid==item.val().upId){
-                    array.push({...item.val(),id:item.key})
-                }
-            })
-            setNewEducation(array)
-        });
-    },[])
-    // handle images uplod==========
+    const cropperRef = createRef();
+    //img uplod 
     const handleImg = (e) => {
         e.preventDefault();
         let files;
@@ -158,38 +96,77 @@ const Profile = () => {
         };
         reader.readAsDataURL(files[0]);
       };
-    /////////////////////////
-    const getCropData = () => {
-        console.log('ami');
-        if (typeof cropperRef.current?.cropper !== "undefined"){
-          const message4 = cropperRef.current?.cropper.getCroppedCanvas().toDataURL();
-          uploadString(storageRef, message4, 'data_url').then((snapshot) => {
-            console.log('Uploaded a data_url string!');
-            // getDownloadURL(snapshot.ref).then((downloadURL) => {
-            //   console.log('File available at', downloadURL);
-            //   set(dataRef(db, 'users/' + data.uid), {
-            //     username: data.displayName,
-            //     email: data.email,
-            //     profile_picture :downloadURL
-            //   }).then(()=>{
-            //     localStorage.setItem('user',JSON.stringify({...data,photoURL:downloadURL}))
-            //     dispatch(userLogin({...data,photoURL:downloadURL}));
-            //   }).then(()=>{
-            //     setOpen(false)
-            //   })
-            // });
-          });
-        }
-      };
 
 
+
+ 
+////////////////
+    let subtitle;
+    const storage = getStorage();
+    const storageRef = ref(storage, userInfo.uid);
+
+    useEffect(()=>{
+
+        if(!userInfo){
+            navigate('/login')
+          }else{
+              navigate('/profile')
+          }
+
+        const updateProfileRef = dataRef(db, 'updateProfile');
+        onValue(updateProfileRef, (snapshot) => {
+            let array=[]
+            snapshot.forEach((item)=>{
+                if(userInfo.uid==item.val().upId){
+                    array.push(item.val())
+                }
+
+            })
+            setProfile(array)
+        });
+        // about data
+        const aboutRef = dataRef(db, 'updateAbout');
+        onValue(aboutRef, (snapshot) => {
+            let array=[]
+            snapshot.forEach((item)=>{
+                if(userInfo.uid==item.val().upId){
+                    array.push(item.val())
+                }
+
+            })
+            setAboutUp(array)
+        });
+        // new addExprerience data
+        const expRef = dataRef(db, 'addExprerience');
+        onValue(expRef, (snapshot) => {
+            let array=[]
+            snapshot.forEach((item)=>{
+                if(userInfo.uid==item.val().upId){
+                    array.push({...item.val(),expId:item.key})
+                }
+
+            })
+            setNewExp(array)
+        });
+        // add education
+        const educationRef = dataRef(db, 'addEducation');
+        onValue(educationRef, (snapshot) => {
+            let array=[]
+            snapshot.forEach((item)=>{
+                if(userInfo.uid==item.val().upId){
+                    array.push({...item.val(),id:item.key})
+                }
+            })
+            setNewEducation(array)
+        });
+    },[])
     // about profile input change
     const handleChang =(e)=>{
         setUpProfile({...upProfile,[e.target.name]:e.target.value})
     }
     //=============== handle profile=================
     const handleUpSubmit =(e)=>{
-        set(ref(db, 'updateProfile/'+userInfo.uid), {
+        set(dataRef(db, 'updateProfile/'+userInfo.uid), {
           name:upProfile.name,
           discription:upProfile.discription,
           upId:userInfo.uid
@@ -225,7 +202,7 @@ const Profile = () => {
     }
     //    handle about logo click
     const handleAboutClick =()=>{
-        set(ref(db, 'updateAbout/'+userInfo.uid), {
+        set(dataRef(db, 'updateAbout/'+userInfo.uid), {
             aboutText:about,
             upId:userInfo.uid
         }).then(()=>{
@@ -259,7 +236,7 @@ const Profile = () => {
     }
     // handle exprerience form submit
     const submitExp =(e)=>{
-        set(push(ref(db, 'addExprerience')), {
+        set(push(dataRef(db, 'addExprerience')), {
             title:title,
             company:company,
             description:description,
@@ -279,7 +256,7 @@ const Profile = () => {
         setExpItemID(item.expId);
     }
     const updateExp =(e)=>{
-        update(ref(db, 'addExprerience/'+expItemId),{
+        update(dataRef(db, 'addExprerience/'+expItemId),{
             title:title,
             company:company,
             description:description,
@@ -292,7 +269,7 @@ const Profile = () => {
     }
     // exprerience item delete button 
     const handleExpDelete =(id)=>{
-        remove(ref(db, 'addExprerience/'+id))
+        remove(dataRef(db, 'addExprerience/'+id))
     }
     // handleEducation add button
     const handleEducation =()=>{
@@ -312,7 +289,7 @@ const Profile = () => {
     }
     // submitEducation
     const submitEducation =(e)=>{
-        set(push(ref(db, 'addEducation')), {
+        set(push(dataRef(db, 'addEducation')), {
             name:clgName,
             title:clgTitle,
             description:clgDescription,
@@ -333,7 +310,7 @@ const Profile = () => {
 
     // editEducation submit
     const editEducation =(e)=>{
-         update(ref(db, 'addEducation/'+educationId),{
+         update(dataRef(db, 'addEducation/'+educationId),{
             name:clgName,
             title:clgTitle,
             description:clgDescription,
@@ -347,7 +324,7 @@ const Profile = () => {
 
     // handleEdcutaionDelete button
     const handleEdcutaionDelete =(id)=>{
-        remove(ref(db, 'addEducation/'+id))
+        remove(dataRef(db, 'addEducation/'+id))
     }
     // handleImgUplod 
     const handleImgUplod =()=>{
@@ -359,6 +336,30 @@ const Profile = () => {
     function profileImgCloseModal() {
         setProfileImgOpen(false);
     }
+    // img crop data
+    const getCropData = () => {
+        if (typeof cropperRef.current?.cropper !== "undefined"){
+          const message4 = cropperRef.current?.cropper.getCroppedCanvas().toDataURL();
+          uploadString(storageRef, message4, 'data_url').then((snapshot) => {
+            console.log('Uploaded a data_url string!');
+            getDownloadURL(snapshot.ref).then((downloadURL) => {
+              console.log('File available at', downloadURL);
+              set(dataRef(db, 'users/' + userInfo.uid), {
+                username:userInfo.displayName,
+                email: userInfo.email,
+                profile_picture :downloadURL
+              }).then(()=>{
+                localStorage.setItem('userdata',JSON.stringify({...userInfo,photoURL:downloadURL}))
+                dispatch(userData({...userInfo,photoURL:downloadURL}));
+                console.log('img chang');
+              }).then(()=>{
+                setProfileImgOpen(false)
+              })
+            });
+          });
+        }
+      };
+      console.log(userInfo);
 
   return (
     <div className='pt-28'>
@@ -370,7 +371,7 @@ const Profile = () => {
             <div className='bg-bg_promary py-10 grid grid-cols-4 px-10 relative'>
                 <div className="col-span-1">
                     <div onClick={handleImgUplod} className='w-60 h-60  absolute top-0 left-20 translate-y-[-20px] cursor-pointer'>
-                        <Images className='h-full rounded-full ring-8 ring-bg_promary' src={SR}/>
+                        <Images className='h-full rounded-full ring-8 ring-bg_promary' src={userInfo.photoURL}/>
                     </div>
                 </div>
                 <div className="col-span-3 text-white">
@@ -393,7 +394,7 @@ const Profile = () => {
                             </div>
                     </div>
                     {profile.length==0
-                        ?<Paragraph text='write a description '/>
+                        ?<Paragraph text='add description '/>
                         :profile.map((item)=>(
                             <div key={item.upId}>
                                 <Paragraph text={item.discription}/>
@@ -620,52 +621,38 @@ const Profile = () => {
         </div>
         <Heading className='text-center py-4 text-white' text='profile img uplod'/>
         {/* ////////////////// */}
-        <div>
-      <div style={{ width: "100%" }}>
-        <input type="file" onChange={handleImg} />
-        <button>Use default img</button>
-        <br />
-        <br />
-        <Cropper
-          ref={cropperRef}
-          style={{ height: 400, width: "100%" }}
-          zoomTo={0.5}
-          initialAspectRatio={1}
-          preview=".img-preview"
-          src={image}
-          viewMode={1}
-          minCropBoxHeight={10}
-          minCropBoxWidth={10}
-          background={false}
-          responsive={true}
-          autoCropArea={1}
-          checkOrientation={false} // https://github.com/fengyuanchen/cropperjs/issues/671
-          guides={true}
-        />
-      </div>
-      <div>
-        <div className="box" style={{ width: "50%", float: "right" }}>
-          <h1>Preview</h1>
-          <div
-            className="img-preview"
-            style={{ width: "100%", float: "left", height: "300px" }}
-          />
-        </div>
-        <div
-          className="box"
-          style={{ width: "50%", float: "right", height: "300px" }}
-        >
-          <h1>
-            <span>Crop</span>
-            <button className='text-white' style={{ float: "right" }} onClick={getCropData}>
-              Crop Image
-            </button>
-          </h1>
-          <img style={{ width: "100%" }} src={cropData} alt="cropped" />
-        </div>
-      </div>
-      <br style={{ clear: "both" }} />
-    </div>
+        <input className='cursor-pointer mb-5 w-24' onChange={handleImg} type="file" />
+            <Cropper
+              ref={cropperRef}
+              style={{ height: 200, width: "100%" }}
+              zoomTo={0.5}
+              initialAspectRatio={1}
+              preview=".img-preview"
+              src={image}
+              viewMode={1}
+              minCropBoxHeight={10}
+              minCropBoxWidth={10}
+              background={false}
+              responsive={true}
+              autoCropArea={1}
+              checkOrientation={false}
+              guides={true}
+            />
+            <div>
+              <div className="croppbox" style={{ width: "50%", float: "right" }}>
+                <h1>Preview</h1>
+                <div
+                  className="img-preview"
+                  style={{ width: "100%", float: "left", height: "300px" }}
+                />
+              </div>
+              <div
+                className="croppbox"
+                style={{ width: "50%", float: "right", height: "300px" }}
+              >
+                <Button onclick={getCropData} className='mt-5' text='Img Uplod'/>
+              </div>
+            </div>
         {/* /////////////////// */}
       </Modal>
     </div>
