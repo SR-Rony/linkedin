@@ -23,6 +23,8 @@ import { getStorage, ref, uploadString,getDownloadURL} from "firebase/storage";
 import Heading from '../components/heading/Heading'
 import { useNavigate } from 'react-router-dom'
 import { userData } from '../slices/userSlice'
+import List from '../components/list/List'
+import ListItem from '../components/list/ListItem'
 
 const customStyles = {
     content: {
@@ -395,13 +397,13 @@ const Profile = () => {
                     </div>
                 </div>
             ))}
-            <div className="flex gap-2 py-10 my-10 bg-bg_secoundary justify-center">
-                <Paragraph className='w-60 py-5 text-center bg-white text-primary hover:text-white hover:bg-primary' text='PROFILE'/>
-                <Paragraph className='w-60 text-center py-5 bg-white text-primary hover:text-white hover:bg-primary' text='FRIENDS'/>
-                <Paragraph className='w-60 text-center py-5 bg-white text-primary hover:text-white hover:bg-primary' text='POST'/>
-            </div>
+            <List className="flex gap-2 py-10 justify-center items-center">
+                <ListItem className='px-16 py-5 text-xl bg-white text-primary hover:text-white hover:bg-primary' text='PROFILE'/>
+                <ListItem className='px-16 py-5 text-xl bg-white text-primary hover:text-white hover:bg-primary' text='FRIENDS' path='/friends'/>
+                <ListItem className='px-16 py-5 text-xl bg-white text-primary hover:text-white hover:bg-primary' text='POST'/>
+            </List>
             {/*============ about me ===========*/}
-            <div className='bg-bg_promary p-10 my-10 text-white relative'>
+            <div className='bg-bg_promary p-10 text-white relative'>
                 <EditLogo className={`absolute top-10 right-10`} onClick={handleAbout} icone={<BiSolidEditAlt/>}/>
                 <Heading text='About Me'/>
                 {aboutUp&&aboutUp.map((item)=>(
@@ -412,7 +414,7 @@ const Profile = () => {
                 <Button text='Read more'/>
             </div>
             {/*================ project ============= */}
-            <div className='bg-bg_promary p-10 my-10 text-white relative'>
+            <div className='bg-bg_promary p-10 my-5 text-white relative'>
             <EditLogo className={`absolute top-10 right-10`} onClick={handleproject} icone={<BiSolidEditAlt/>}/>
                 <Heading className='my-10' text='Porject'/>
                 <div className='grid grid-cols-3 gap-5'>
@@ -428,7 +430,7 @@ const Profile = () => {
                 </div>
             </div>
             {/*============ Experience ===============*/}
-            <div className='bg-bg_promary p-10 my-10 text-white relative'>
+            <div className='bg-bg_promary p-10 my-5 text-white relative'>
                 <EditLogo className={`absolute top-10 right-10`} onClick={handleExperience} icone={<FaPlusMinus />}/>
                 <Heading className='my-10' text='Experience'/>
                     {newExp&&
@@ -451,7 +453,7 @@ const Profile = () => {
                     }
             </div>
             {/*=============== Education =============*/}
-            <div className='bg-bg_promary p-10 my-10 text-white relative'>
+            <div className='bg-bg_promary p-10 my-5 text-white relative'>
             <EditLogo className={`absolute top-10 right-20`} onClick={handleEducation} icone={<FaPlusMinus />}/>
                 <Heading className='my-10' text='Education'/>
                 {NewEducation&& NewEducation.map((item)=>(

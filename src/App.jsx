@@ -14,6 +14,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import RootLayout from './components/rootLayout/RootLayout';
+import Friends from './pages/Friends';
 
 function App() {
 
@@ -26,6 +27,7 @@ function App() {
         <Route path='/' element={<RootLayout/>}>
           <Route path='/profile' element={<Profile/>}/>
           <Route path='/home' element={<Home/>}/>
+          <Route path='/friends' element={<Friends/>}/>
         </Route>
       </Route>
     )
