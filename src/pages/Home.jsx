@@ -14,13 +14,15 @@ import { MdPermMedia,MdEventNote,MdTextSnippet   } from "react-icons/md";
 import { useSelector } from 'react-redux'
 import { getDatabase, ref, onValue, set, push,update,remove,  } from "firebase/database";
 import Button from '../components/button/Button'
+import { getStorage, ref as uplodRef,uploadBytes,getDownloadURL } from "firebase/storage";
 
 
 const Home = () => {
+  const storage = getStorage();
   const db = getDatabase();
 let navigate =useNavigate()
-const [profile,setProfile]=useState([])
 const [user,setUser]=useState([])
+const [uplodData,setUplodData]=useState([])
 
 // handleProfile
 const handleProfile =()=>{
@@ -39,13 +41,41 @@ let userInfo=useSelector(state=>(state.user.value))
         onValue(userRef, (snapshot) => {
             let array=[]
             snapshot.forEach((item)=>{
-              if(userInfo.uid!=item.key)
-                  array.push({...item.val(),id:item.key})
+              if(userInfo.uid!=item.key){
+                array.push({...item.val(),id:item.key})
+              }
 
             })
             setUser(array)
         });
+        // user uplod faire base data
+        const uplodRef = ref(db, 'uplodData');
+        onValue(uplodRef, (snapshot) => {
+            let array=[]
+            snapshot.forEach((item)=>{
+                  array.push({...item.val(),id:item.key})
+
+            })
+            setUplodData(array)
+        });
   },[])
+
+  // handlePost button
+  const handlePost =(e)=>{
+    const storageRef = uplodRef(storage,e.target.files[0].name);
+    uploadBytes(storageRef, e.target.files[0]).then((snapshot) => {
+      getDownloadURL(storageRef).then((downloadURL) => {
+        console.log('img',downloadURL);
+        set(push(ref(db, 'uplodData')),{
+          profileImg:userInfo.photoURL,
+          senderName: userInfo.displayName,
+          senderId: userInfo.uid,
+          uplodData : downloadURL
+        });
+      })
+    })
+    
+  }
 
 
   return (
@@ -76,10 +106,13 @@ let userInfo=useSelector(state=>(state.user.value))
                 </div>
               </div>
               <div className='flex justify-between pt-5 px-5'>
-                  <div className="flex items-center cursor-pointer text-white hover:text-primary">
-                    <MdPermMedia className='text-2xl'/>
-                    <Paragraph text='Media'/>
-                  </div>
+                    <label>
+                      <input onChange={handlePost} type="file" hidden />
+                      <div className="flex items-center cursor-pointer text-white hover:text-primary">
+                        <MdPermMedia className='text-2xl'/>
+                        <Paragraph text='Media'/>
+                      </div>
+                    </label>
                   <div className="flex cursor-pointer items-center text-white hover:text-primary">
                     <MdEventNote className='text-2xl'/>
                     <Paragraph text='Event'/>
@@ -91,7 +124,7 @@ let userInfo=useSelector(state=>(state.user.value))
               </div>
             </div>
 
-            <div className='bg-bg_promary  p-5 text-white rounded-xl my-5'>
+            {/* <div className='bg-bg_promary  p-5 text-white rounded-xl my-5'>
               <div className='flex gap-4 items-center border-b-2 border-primary pb-4'>
                 <div className=' w-10 h-10 rounded-full ring-4 ring-primary overflow-hidden'>
                   <Images src={img}/>
@@ -124,7 +157,45 @@ let userInfo=useSelector(state=>(state.user.value))
                   <Paragraph text='Send'/>
                 </div>
               </div>
-            </div>
+            </div> */}
+            {uplodData&&uplodData.map((item)=>(
+                <div className='bg-bg_promary  p-5 text-white rounded-xl my-5'>
+                <div className='flex gap-4 items-center border-b-2 border-primary pb-4'>
+                  <div className=' w-10 h-10 rounded-full ring-4 ring-primary overflow-hidden'>
+                    <Images src={item.profileImg}/>
+                  </div>
+                  <Paragraph text={item.senderName}/>
+                </div>
+                <div>
+                  <Paragraph text='description' className='py-5'/>
+                  <Images src={item.uplodData}/>
+                  <div className='flex justify-between py-2'>
+                  <span>Like:</span>
+                    <span>Comment:</span>
+                  </div>
+                </div>
+                <div className='flex justify-between border-t-2 border-primary p-5'>
+                  <div className="flex items-center cursor-pointer text-white hover:text-primary">
+                  <AiFillLike className=' text-2xl' />
+                    <Paragraph text='Like'/>
+                  </div>
+                  <div className="flex items-center cursor-pointer text-white hover:text-primary">
+                    <FaComment className=' text-2xl' />
+                    <Paragraph text='Comment'/>
+                  </div>
+                  <div className="flex items-center cursor-pointer text-white hover:text-primary">
+                  <BiRepost className=' text-3xl' />
+                    <Paragraph text='Repost'/>
+                  </div>
+                  <div className="flex items-center cursor-pointer text-white hover:text-primary ">
+                  <IoIosSend className=' text-2xl' />
+                    <Paragraph text='Send'/>
+                  </div>
+                </div>
+              </div>
+            ))
+            
+            }
           </div>
           <div className="col-span-1 bg-bg_promary  text-white h-screen rounded-xl p-5">
             <Heading className='text-center border-b-2 border-primary pb-5' text='All User'/>
