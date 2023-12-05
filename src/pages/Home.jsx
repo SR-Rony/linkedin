@@ -41,10 +41,7 @@ let userInfo=useSelector(state=>(state.user.value))
         onValue(userRef, (snapshot) => {
             let array=[]
             snapshot.forEach((item)=>{
-              if(userInfo.uid!=item.key){
-                array.push({...item.val(),id:item.key})
-              }
-
+              array.push({...item.val(),id:item.key})
             })
             setUser(array)
         });
@@ -76,20 +73,36 @@ let userInfo=useSelector(state=>(state.user.value))
     })
     
   }
+  // handleFriendReq button
+  const handleFriendReq =(item)=>{
+    console.log(item);
+    set(push(ref(db, 'friendRequst')),{
+      senderProfile:item.profile_picture,
+      senderName: userInfo.displayName,
+      senderId: userInfo.uid,
+      reciveName : item.userName,
+      reciveId:item.id
+    });
+  }
 
 
   return (
    <div className='pt-28'>
       <Container>
         <div className='grid grid-cols-5 gap-4'>
-          <div className="col-span-1 w-full text-white h-screen rounded-xl overflow-hidden">
+          <div className="col-span-1 w-full text-white rounded-xl overflow-hidden">
               <div className=' relative  bg-bg_promary pb-5'>
                 <Images className='w-full h-32' src={cover}/>
-                <div onClick={handleProfile} className=' w-24 h-24 rounded-full object-cover absolute top-20 left-1/2 translate-x-[-50%] ring-4 ring-bg_promary cursor-pointer overflow-hidden'>
-                <Images src={userInfo.photoURL}/>
-                </div>
-                <Heading className='text-center pt-16' text={userInfo.displayName}/>
-                {/* {user.map(item=>item.id==userInfo.uid&&<Paragraph text={userInfo.discription} className='text-center py-3 border-b-2 border-primary'/>)} */}
+                {user.map((item)=>(
+                  userInfo.uid==item.id&&
+                  <>
+                  <div onClick={handleProfile} className=' w-24 h-24 rounded-full object-cover absolute top-20 left-1/2 translate-x-[-50%] ring-4 ring-bg_promary cursor-pointer overflow-hidden'>
+                    <Images src={item.profile_picture}/>
+                  </div>
+                  <Heading className='text-center pt-16' text={item.userName}/>
+                  <Paragraph text={item.discription} className='text-center py-3 border-b-2 border-primary'/>
+                  </>
+                ))}
                 <h2 className='text-center cursor-pointer text-xl mt-2' onClick={handleProfile}>Vew Full Profile</h2>
               </div>
           </div>
@@ -97,9 +110,12 @@ let userInfo=useSelector(state=>(state.user.value))
             <div className='bg-bg_promary p-5 rounded-xl mb-5'>
               <div className='grid grid-cols-7 '>
                 <div className="col-span-1">
-                <div className=' w-16 h-16 rounded-full ring-4 ring-primary overflow-hidden'>
-                  <Images src={userInfo.photoURL}/>
-                </div>
+                {user.map((item)=>(
+                  userInfo.uid==item.id&&
+                  <div className=' w-16 h-16 rounded-full ring-4 ring-primary overflow-hidden'>
+                    <Images src={item.profile_picture}/>
+                  </div>
+                ))}
                 </div>
                 <div className="col-span-6">
                   <input type="text" className='w-full p-4 rounded-full ring-4 ring-primary' placeholder='Start a Post'  />
@@ -123,41 +139,6 @@ let userInfo=useSelector(state=>(state.user.value))
                   </div>
               </div>
             </div>
-
-            {/* <div className='bg-bg_promary  p-5 text-white rounded-xl my-5'>
-              <div className='flex gap-4 items-center border-b-2 border-primary pb-4'>
-                <div className=' w-10 h-10 rounded-full ring-4 ring-primary overflow-hidden'>
-                  <Images src={img}/>
-                </div>
-                <Paragraph text='SR Rony'/>
-              </div>
-              <div>
-                <Paragraph text='description' className='py-5'/>
-                <Images src={cover}/>
-                <div className='flex justify-between py-2'>
-                <span>Like:</span>
-                  <span>Comment:</span>
-                </div>
-              </div>
-              <div className='flex justify-between border-t-2 border-primary p-5'>
-                <div className="flex items-center cursor-pointer text-white hover:text-primary">
-                <AiFillLike className=' text-2xl' />
-                  <Paragraph text='Like'/>
-                </div>
-                <div className="flex items-center cursor-pointer text-white hover:text-primary">
-                  <FaComment className=' text-2xl' />
-                  <Paragraph text='Comment'/>
-                </div>
-                <div className="flex items-center cursor-pointer text-white hover:text-primary">
-                <BiRepost className=' text-3xl' />
-                  <Paragraph text='Repost'/>
-                </div>
-                <div className="flex items-center cursor-pointer text-white hover:text-primary ">
-                <IoIosSend className=' text-2xl' />
-                  <Paragraph text='Send'/>
-                </div>
-              </div>
-            </div> */}
             {uplodData&&uplodData.map((item)=>(
                 <div className='bg-bg_promary  p-5 text-white rounded-xl my-5'>
                 <div className='flex gap-4 items-center border-b-2 border-primary pb-4'>
@@ -197,15 +178,16 @@ let userInfo=useSelector(state=>(state.user.value))
             
             }
           </div>
-          <div className="col-span-1 bg-bg_promary  text-white h-screen rounded-xl p-5">
+          <div className="col-span-1 bg-bg_promary h-screen  text-white rounded-xl p-5">
             <Heading className='text-center border-b-2 border-primary pb-5' text='All User'/>
             {user.map((item)=>(
-              <div key={item.id} className='flex justify-between items-center py-5'>
+             userInfo.uid!=item.id&&
+             <div key={item.id} className='flex justify-between items-center py-5'>
                 <div className=' w-10 h-10 rounded-full ring-4 ring-primary overflow-hidden'>
                   <Images src={item.profile_picture}/>
                 </div>
                 <Paragraph text={item.userName}/>
-                <Button text='requst'/>
+                <Button onclick={()=>handleFriendReq(item)} text='requst'/>
               </div>
             ))}
           </div>

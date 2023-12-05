@@ -25,6 +25,7 @@ import { useNavigate } from 'react-router-dom'
 import { userData } from '../slices/userSlice'
 import List from '../components/list/List'
 import ListItem from '../components/list/ListItem'
+import Footer from '../components/footer/Footer'
 
 const customStyles = {
     content: {
@@ -474,6 +475,8 @@ const Profile = () => {
                     </div>
                 ))}
             </div>
+            {/* footer */}
+            <Footer/>
         </Container>
         {/*============profile modal============  */}
         <Modal

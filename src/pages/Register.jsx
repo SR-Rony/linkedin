@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {FaLinkedin} from 'react-icons/fa'
 import {AiFillEyeInvisible,AiFillEye} from 'react-icons/ai'
 import Button from '../components/button/Button'
@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom'
 import {toast } from 'react-toastify';
 import { getDatabase,ref, set } from "firebase/database";
 import Heading from '../components/heading/Heading'
+import { useSelector } from 'react-redux'
 
 const Register = () => {
   const db = getDatabase();
@@ -21,7 +22,16 @@ const Register = () => {
   const [nameError,setNameError]=useState('')
   const [emailError,setEmailError]=useState('')
   const [passwordError,setPasswordError]=useState('')
+  let userInfo = useSelector(state=>(state.user.value))
   let navigate=useNavigate()
+  useEffect(()=>{
+    if(!userInfo){
+      navigate('/')
+    }else{
+      navigate('/profile')
+    }
+  },[])
+
 
   // input change
   const handleChange =(e)=>{
