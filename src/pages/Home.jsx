@@ -23,6 +23,9 @@ const Home = () => {
 let navigate =useNavigate()
 const [user,setUser]=useState([])
 const [uplodData,setUplodData]=useState([])
+// const [cancle,setCancle]=useState(false)
+const [friendReq,setFriendReq]=useState([])
+const [friendId,setFriendId]=useState([])
 
 // handleProfile
 const handleProfile =()=>{
@@ -42,6 +45,7 @@ let userInfo=useSelector(state=>(state.user.value))
             let array=[]
             snapshot.forEach((item)=>{
               array.push({...item.val(),id:item.key})
+              console.log(array);
             })
             setUser(array)
         });
@@ -51,10 +55,27 @@ let userInfo=useSelector(state=>(state.user.value))
             let array=[]
             snapshot.forEach((item)=>{
                   array.push({...item.val(),id:item.key})
-
             })
             setUplodData(array)
         });
+        // friend requset faire base data
+        const friendReqRef = ref(db, 'friendRequst');
+        onValue(friendReqRef, (snapshot) => {
+            let array=[]
+            snapshot.forEach((item)=>{
+                  array.push({...item.val(),reqId:item.key})
+            })
+            setFriendReq(array)
+        });
+        // friend firebase info
+      const friendRef = ref(db, 'friend');
+      onValue(friendRef, (snapshot) => {
+          let array=[]
+          snapshot.forEach((item)=>{
+              array.push(item.val().senderId+item.val().reciveId)
+          })
+          setFriendId(array)
+      });
   },[])
 
   // handlePost button
@@ -68,21 +89,29 @@ let userInfo=useSelector(state=>(state.user.value))
           senderName: userInfo.displayName,
           senderId: userInfo.uid,
           uplodData : downloadURL
-        });
+        })
       })
     })
     
   }
   // handleFriendReq button
   const handleFriendReq =(item)=>{
-    console.log(item);
     set(push(ref(db, 'friendRequst')),{
       senderProfile:item.profile_picture,
       senderName: userInfo.displayName,
       senderId: userInfo.uid,
       reciveName : item.userName,
       reciveId:item.id
-    });
+    })
+  }
+  //handleReqCancle button
+  const handleReqCancle =(item)=>{
+    friendReq.map((id)=>{
+      if(id.reciveId==item.id&& userInfo.uid==id.senderId){
+        remove(ref(db,'friendRequst/'+id.reqId))
+      }
+    })
+    // console.log(item);
   }
 
 
@@ -100,10 +129,10 @@ let userInfo=useSelector(state=>(state.user.value))
                     <Images src={item.profile_picture}/>
                   </div>
                   <Heading className='text-center pt-16' text={item.userName}/>
-                  <Paragraph text={item.discription} className='text-center py-3 border-b-2 border-primary'/>
+                  <Paragraph text={item.discription} className='text-center'/>
                   </>
                 ))}
-                <h2 className='text-center cursor-pointer text-xl mt-2' onClick={handleProfile}>Vew Full Profile</h2>
+                <h2 className='text-center cursor-pointer text-xl mt-2 py-3 border-b-2 border-primary' onClick={handleProfile}>Vew Full Profile</h2>
               </div>
           </div>
           <div className="col-span-3 rounded-xl overflow-hidden">
@@ -187,7 +216,13 @@ let userInfo=useSelector(state=>(state.user.value))
                   <Images src={item.profile_picture}/>
                 </div>
                 <Paragraph text={item.userName}/>
-                <Button onclick={()=>handleFriendReq(item)} text='requst'/>
+                {friendReq.find((e)=>(e.reciveId==item.id))
+                  ?<Button className='ring ring-red-600 text-red-600 hover:bg-red-600' onclick={()=>handleReqCancle(item)} text='Cancle'/>
+                  :friendId.includes(item.id+userInfo.uid)||friendId.includes(userInfo.uid+item.id)
+                  ?<Button className='ring ring-green-600 text-green-600 hover:bg-green-600' text='Friend'/>
+                  :<Button onclick={()=>handleFriendReq(item)} text='Requst'/>
+                }
+                
               </div>
             ))}
           </div>
