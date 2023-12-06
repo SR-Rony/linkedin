@@ -8,6 +8,7 @@ import { IoIosSend } from "react-icons/io";
 import { FaComment } from "react-icons/fa";
 import { AiFillLike } from "react-icons/ai";
 import { BiRepost } from "react-icons/bi";
+import { HiDotsVertical } from "react-icons/hi";
 import { MdPermMedia,MdEventNote,MdTextSnippet   } from "react-icons/md";
 import { useSelector } from 'react-redux'
 import { getDatabase, ref, onValue, set, push,update,remove,  } from "firebase/database";
@@ -42,7 +43,6 @@ let userInfo=useSelector(state=>(state.user.value))
             let array=[]
             snapshot.forEach((item)=>{
               array.push({...item.val(),id:item.key})
-              console.log(array);
             })
             setUser(array)
         });
@@ -94,11 +94,12 @@ let userInfo=useSelector(state=>(state.user.value))
   // handleFriendReq button
   const handleFriendReq =(item)=>{
     set(push(ref(db, 'friendRequst')),{
-      senderProfile:item.profile_picture,
+      senderProfile:userInfo.photoURL,
       senderName: userInfo.displayName,
       senderId: userInfo.uid,
       reciveName : item.userName,
-      reciveId:item.id
+      reciveId:item.id,
+      reciverProfile:item.profile_picture
     })
   }
   //handleReqCancle button
@@ -116,7 +117,7 @@ let userInfo=useSelector(state=>(state.user.value))
    <div className='pt-28'>
       <Container>
         <div className='grid grid-cols-5 gap-4'>
-          <div className="col-span-1 w-full text-white rounded-xl overflow-hidden">
+          <div className="col-span-1">
               <Sightbar/>
           </div>
           <div className="col-span-3 rounded-xl overflow-hidden">
@@ -153,7 +154,8 @@ let userInfo=useSelector(state=>(state.user.value))
               </div>
             </div>
             {uplodData&&uplodData.map((item)=>(
-                <div className='bg-bg_promary  p-5 text-white rounded-xl my-5'>
+                <div className='bg-bg_promary  p-5 text-white rounded-xl my-5 relative'>
+                  <HiDotsVertical className='absolute top-5 right-5 cursor-pointer text-white text-2xl' />
                 <div className='flex gap-4 items-center border-b-2 border-primary pb-4'>
                   <div className=' w-10 h-10 rounded-full ring-4 ring-primary overflow-hidden'>
                     <Images src={item.profileImg}/>

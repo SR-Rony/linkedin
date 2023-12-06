@@ -15,6 +15,7 @@ import Home from './pages/Home';
 import Profile from './pages/Profile';
 import RootLayout from './components/rootLayout/RootLayout';
 import Friends from './pages/Friends';
+import Message from './pages/Message';
 
 function App() {
 
@@ -28,6 +29,7 @@ function App() {
           <Route path='/profile' element={<Profile/>}/>
           <Route path='/home' element={<Home/>}/>
           <Route path='/friends' element={<Friends/>}/>
+          <Route path='/message' element={<Message/>}/>
         </Route>
       </Route>
     )
