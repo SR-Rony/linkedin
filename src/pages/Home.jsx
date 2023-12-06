@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Container from '../components/container/Container'
 import Images from '../components/images/Images'
-import cover from '../assets/cover.jpg'
-import img from '../assets/SR-Rony.png'
 import Heading from '../components/heading/Heading'
 import { useNavigate } from 'react-router-dom'
 import Paragraph from '../components/paragraph/Paragraph'
@@ -15,6 +13,7 @@ import { useSelector } from 'react-redux'
 import { getDatabase, ref, onValue, set, push,update,remove,  } from "firebase/database";
 import Button from '../components/button/Button'
 import { getStorage, ref as uplodRef,uploadBytes,getDownloadURL } from "firebase/storage";
+import Sightbar from '../components/sightbar/Sightbar'
 
 
 const Home = () => {
@@ -28,9 +27,7 @@ const [friendReq,setFriendReq]=useState([])
 const [friendId,setFriendId]=useState([])
 
 // handleProfile
-const handleProfile =()=>{
-  navigate('/profile')
-}
+
 let userInfo=useSelector(state=>(state.user.value))
 // console.log(userInfo);
   useEffect(()=>{
@@ -120,20 +117,7 @@ let userInfo=useSelector(state=>(state.user.value))
       <Container>
         <div className='grid grid-cols-5 gap-4'>
           <div className="col-span-1 w-full text-white rounded-xl overflow-hidden">
-              <div className=' relative  bg-bg_promary pb-5'>
-                <Images className='w-full h-32' src={cover}/>
-                {user.map((item)=>(
-                  userInfo.uid==item.id&&
-                  <>
-                  <div onClick={handleProfile} className=' w-24 h-24 rounded-full object-cover absolute top-20 left-1/2 translate-x-[-50%] ring-4 ring-bg_promary cursor-pointer overflow-hidden'>
-                    <Images src={item.profile_picture}/>
-                  </div>
-                  <Heading className='text-center pt-16' text={item.userName}/>
-                  <Paragraph text={item.discription} className='text-center'/>
-                  </>
-                ))}
-                <h2 className='text-center cursor-pointer text-xl mt-2 py-3 border-b-2 border-primary' onClick={handleProfile}>Vew Full Profile</h2>
-              </div>
+              <Sightbar/>
           </div>
           <div className="col-span-3 rounded-xl overflow-hidden">
             <div className='bg-bg_promary p-5 rounded-xl mb-5'>
