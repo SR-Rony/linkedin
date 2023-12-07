@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Container from '../components/container/Container'
 import Sightbar from '../components/sightbar/Sightbar'
 import MyFriends from '../components/my-friends/MyFriends'
@@ -7,10 +7,43 @@ import img from '../assets/sr.jpg'
 import Paragraph from '../components/paragraph/Paragraph'
 import { useSelector } from 'react-redux'
 import Button from '../components/button/Button'
+import { getDatabase, ref, onValue, set, push,update,remove,  } from "firebase/database";
 
 const Message = () => {
+    const db = getDatabase();
+    const [inputValue,setInputValue]=useState('')
+    const [messages,setMessages]=useState([])
     let userInfo=useSelector((state)=>(state.user.value))
+    // console.log('user',userInfo);
     let activeMsg=useSelector((state)=>(state.active.value))
+    // console.log('active',activeMsg);
+
+    useEffect(()=>{
+        // firebase message data
+        const messageRef = ref(db, 'message');
+      onValue(messageRef, (snapshot) => {
+          let array=[]
+          snapshot.forEach((item)=>{
+            if((userInfo.uid==item.val().senderId && activeMsg.senderId==item.val().reciverId)||(userInfo.uid==item.val().reciverId && activeMsg.senderId==item.val().senderId)){
+                array.push({...item.val(),msgId:item.key})
+            }
+          })
+          setMessages(array)
+      });
+    },[])
+
+    // handleSendMsg button
+    const handleSendMsg =()=>{
+        set(push(ref(db,'message')),{
+            senderName:userInfo.displayName,
+            senderId:userInfo.uid,
+            reciverName:activeMsg.senderName,
+            reciverId:activeMsg.senderId,
+            messages:inputValue
+        }).then(()=>{
+            setInputValue('')
+        })
+    }
   return (
     <div className='pt-28'>
         <Container>
@@ -27,16 +60,20 @@ const Message = () => {
                         <Paragraph text={activeMsg.senderName}/>
                     </div>
                     <div className="w-full h-4/5 mt-20 px-4 overflow-y-scroll ">
-                        <div className="text-left">
-                            <Paragraph className='p-2 rounded-xl bg-bg_secoundary inline-block text-black' text='hello'/>
-                        </div>
-                        <div className="text-right">
-                            <Paragraph className='p-2 rounded-xl bg-primary inline-block text-white' text='hello'/>
-                        </div>
+                        {messages.map((item)=>(
+                            item.senderId==userInfo.uid
+                            ?<div key={item.msgId} className="text-right">
+                                <Paragraph className='p-2 rounded-xl bg-primary inline-block text-white' text={item.messages}/>
+                            </div>
+                            :<div key={item.msgId} className="text-left">
+                                <Paragraph className='p-2 rounded-xl bg-bg_secoundary inline-block text-black' text={item.messages}/>
+                            </div>
+                        ))}
+                        
                     </div>
                     <div className='flex items-center justify-between border-t-2 border-primary pt-4 px-5'>
-                        <input type="text" className='w-4/5 p-3' />
-                        <Button text='Send'/>
+                        <input onChange={(e)=>setInputValue(e.target.value)} type="text" placeholder='write message' className='w-4/5 p-3' />
+                        <Button onclick={handleSendMsg} text='Send'/>
                     </div>
                 </div>
             </div>
