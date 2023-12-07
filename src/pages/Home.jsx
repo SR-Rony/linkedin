@@ -109,7 +109,6 @@ let userInfo=useSelector(state=>(state.user.value))
         remove(ref(db,'friendRequst/'+id.reqId))
       }
     })
-    // console.log(item);
   }
 
 
@@ -203,10 +202,10 @@ let userInfo=useSelector(state=>(state.user.value))
                 </div>
                 <Paragraph text={item.userName}/>
                 {friendReq.find((e)=>(e.reciveId==item.id))
-                  ?<Button className='ring ring-red-600 text-red-600 hover:bg-red-600' onclick={()=>handleReqCancle(item)} text='Cancle'/>
+                  ?<Button className='ring ring-red-600 text-red-600 hover:bg-red-600 px-3' onclick={()=>handleReqCancle(item)} text='Cancle'/>
                   :friendId.includes(item.id+userInfo.uid)||friendId.includes(userInfo.uid+item.id)
-                  ?<Button className='ring ring-green-600 text-green-600 hover:bg-green-600' text='Friend'/>
-                  :<Button onclick={()=>handleFriendReq(item)} text='Requst'/>
+                  ?<Button className='ring ring-green-600 text-green-600 hover:bg-green-600 px-3' text='Friend'/>
+                  :<Button className='px-3' onclick={()=>handleFriendReq(item)} text='Requst'/>
                 }
                 
               </div>
