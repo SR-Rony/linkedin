@@ -28,7 +28,7 @@ const Navbar = () => {
     });
   }
   return (
-    <section className='py-5 bg-gray-900 text-white fixed top-0 left-0 w-full z-10 '>
+    <section className='py-5 bg-gray-900 text-white z-50 fixed top-0 left-0 w-full z-10 '>
         <Container>
             <div className="flex items-center justify-between">
                 <FaLinkedin className='inline-block text-4xl text-primary cursor-pointer'/>

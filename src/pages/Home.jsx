@@ -117,7 +117,7 @@ let userInfo=useSelector(state=>(state.user.value))
    <div className='pt-28'>
       <Container>
         <div className='grid grid-cols-5 gap-4'>
-          <div className="col-span-1">
+          <div className="col-span-1 ">
               <Sightbar/>
           </div>
           <div className="col-span-3 rounded-xl overflow-hidden">
