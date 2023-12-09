@@ -5,30 +5,49 @@ import MyFriends from '../components/my-friends/MyFriends'
 import Images from '../components/images/Images'
 import img from '../assets/sr.jpg'
 import Paragraph from '../components/paragraph/Paragraph'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import Button from '../components/button/Button'
 import { getDatabase, ref, onValue, set, push,update,remove,  } from "firebase/database";
+import { activeUser } from '../slices/activeMsg'
 
 const Message = () => {
     const db = getDatabase();
     const [inputValue,setInputValue]=useState('')
     const [messages,setMessages]=useState([])
+    console.log(messages);
     let userInfo=useSelector((state)=>(state.user.value))
-    // console.log('user',userInfo);
     let activeMsg=useSelector((state)=>(state.active.value))
-    // console.log('active',activeMsg);
+    console.log(activeMsg);
+    let dispatch=useDispatch()
 
     useEffect(()=>{
+        console.log('ami');
         // firebase message data
-        const messageRef = ref(db, 'message');
-      onValue(messageRef, (snapshot) => {
+        const messageRef = ref(db, 'message')
+       onValue(messageRef, (snapshot) => {
           let array=[]
           snapshot.forEach((item)=>{
-            if((userInfo.uid==item.val().senderId && activeMsg.senderId==item.val().reciverId)||(userInfo.uid==item.val().reciverId && activeMsg.senderId==item.val().senderId)){
+            console.log(item.val());            
+            if((userInfo.uid==item.val().senderId && activeMsg.activeMsgId==item.val().reciverId)||(userInfo.uid==item.val().reciverId && activeMsg.activeMsgId==item.val().senderId)){
                 array.push({...item.val(),msgId:item.key})
+                console.log('ami',item.val());
             }
           })
           setMessages(array)
+      });
+      // activemsg last msg firebase data
+      const lastMsgRef = ref(db, 'lastMsg');
+      onValue(lastMsgRef, (snapshot) => {
+          snapshot.forEach((item)=>{
+            if(userInfo.uid!=item.val().activeMsgId){
+                dispatch(activeUser({
+                    type:'single',
+                    activeMsgId:item.val().activeMsgId,
+                    activeMsgName:item.val().activeMsgName,
+                    profileImg:item.val().profileImg,
+                }))
+            }
+          })
       });
     },[])
 
@@ -37,12 +56,13 @@ const Message = () => {
         set(push(ref(db,'message')),{
             senderName:userInfo.displayName,
             senderId:userInfo.uid,
-            reciverName:activeMsg.senderName,
-            reciverId:activeMsg.senderId,
+            reciverName:activeMsg.activeMsgName,
+            reciverId:activeMsg.activeMsgId,
             messages:inputValue
-        }).then(()=>{
-            setInputValue('')
         })
+        // .then(()=>{
+        //     setInputValue('')
+        // })
     }
   return (
     <div className='pt-28'>
@@ -56,8 +76,8 @@ const Message = () => {
                 </div>
                 <div className="col-span-3 ring ring-primary rounded-xl relative overflow-hidden bg-bg_promary">
                     <div className='absolute z-10 flex items-center gap-5 p-3 top-0 left-0 w-full border-b-2 border-primary'>
-                        <Images className='w-14 h-14 rounded-full ring-4 ring-primary' src={activeMsg.senderProfile}/>
-                        <Paragraph text={activeMsg.senderName}/>
+                        <Images className='w-14 h-14 rounded-full ring-4 ring-primary' src={activeMsg.profileImg}/>
+                        <Paragraph text={activeMsg.activeMsgName}/>
                     </div>
                     <div className="w-full h-4/5 mt-20 px-4 overflow-y-scroll ">
                         {messages.map((item)=>(

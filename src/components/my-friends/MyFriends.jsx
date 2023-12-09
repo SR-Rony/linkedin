@@ -11,6 +11,7 @@ const MyFriends = () => {
     const db = getDatabase();
     const [friend,setFriend]=useState([])
     let userInfo=useSelector(state=>(state.user.value))
+    
     let navigate=useNavigate()
     let dispatch=useDispatch()
     useEffect(()=>{
@@ -53,8 +54,33 @@ const handleBlock =(item)=>{
 // handleMessage button
 const handleMessage =(item)=>{
   navigate('/message')
-  dispatch(activeUser(item))
-  localStorage.setItem('activeMsg',JSON.stringify(item))
+  if(userInfo.uid==item.senderId){
+    dispatch(activeUser({
+      type:'single',
+      activeMsgId:item.reciveId,
+      activeMsgName:item.reciveName,
+      profileImg:item.reciverProfile
+    }))
+    set(ref(db,'lastMsg/'+item.reciveId),{
+      type:'single',
+      activeMsgId:item.reciveId,
+      activeMsgName:item.reciveName,
+      profileImg:item.reciverProfile
+    })
+  }else{
+    dispatch(activeUser({
+      type:'single',
+      activeMsgId:item.senderId,
+      activeMsgName:item.senderName,
+      profileImg:item.senderProfile
+    }))
+    set(ref(db,'lastMsg/'+item.senderId),{
+      type:'single',
+      activeMsgId:item.senderId,
+      activeMsgName:item.senderName,
+      profileImg:item.senderProfile
+    })
+  }
 
 }
 

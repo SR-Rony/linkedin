@@ -3,7 +3,8 @@ import { createSlice } from '@reduxjs/toolkit'
 export const activeMsg = createSlice({
   name: 'activeMsg',
   initialState: {
-    value:localStorage.getItem('activeMsg')?JSON.parse(localStorage.getItem('activeMsg')):null
+    // value:localStorage.getItem('activeMsg')?JSON.parse(localStorage.getItem('activeMsg')):null
+    value:''
   },
   reducers: {
     activeUser: (state,action) => {
