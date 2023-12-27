@@ -258,8 +258,6 @@ let userInfo=useSelector(state=>(state.user.value))
         style={customStyles}
         contentLabel="Example Modal"
       >
-        {/* <h2 ref={(_subtitle) => (subtitle = _subtitle)}></h2>
-         */}
         <RxCross1 className='cursor-pointer' onClick={closeModal}/>
          <Heading className='text-center' text='All Friend'/>
         <div>
